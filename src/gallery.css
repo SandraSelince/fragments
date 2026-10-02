@@ -1,0 +1,124 @@
+:root {
+  --encre: #1c1a17;
+  --papier: #f4f2ee;
+}
+
+* { box-sizing: border-box; }
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--papier);
+  color: var(--encre);
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  font-weight: 300;
+}
+
+#gallery {
+  position: fixed;
+  inset: 0;
+  display: block;
+  cursor: grab;
+}
+#gallery.is-dragging { cursor: grabbing; }
+#gallery.is-hovering { cursor: pointer; }
+
+#back {
+  position: fixed;
+  top: 24px;
+  right: 28px;
+  z-index: 3;
+  color: var(--encre);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  opacity: 0.7;
+  transition: opacity 200ms ease;
+}
+#back:hover { opacity: 1; }
+
+#hint {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 22px;
+  margin: 0;
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  opacity: 0.45;
+  pointer-events: none;
+  transition: opacity 400ms ease;
+}
+body.is-focused #hint { opacity: 0; }
+
+#caption {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 7vh;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 450ms ease, transform 450ms ease;
+}
+body.is-focused #caption {
+  opacity: 1;
+  transform: none;
+  transition-delay: 250ms;
+}
+#caption h2 {
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+#caption p {
+  margin: 2px 0;
+  font-size: 12px;
+  opacity: 0.65;
+  letter-spacing: 0.03em;
+}
+
+
+/* ---------- Liens de contact (haut gauche) ---------- */
+
+.contact-links {
+  position: fixed;
+  right: 28px;
+  bottom: 24px;
+  z-index: 5;
+  display: flex;
+  gap: 22px;
+}
+
+.site-nav a,
+.contact-links a {
+  color: var(--encre);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  opacity: 0.75;
+  transition: opacity 200ms ease;
+}
+
+.site-nav a:hover,
+.contact-links a:hover,
+.site-nav a:focus-visible,
+.contact-links a:focus-visible {
+  opacity: 1;
+}
+
+
+/* lien About (haut gauche) */
+.site-nav {
+  position: fixed;
+  top: 24px;
+  left: 28px;
+  z-index: 5;
+}

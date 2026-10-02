@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Collages — Sandra Sélince</title>
+    <link rel="stylesheet" href="/src/gallery.css" />
+  </head>
+  <body>
+    <canvas id="gallery"></canvas>
+
+    <nav class="site-nav" aria-label="Navigation"><a href="/about.html">About</a></nav>
+    <nav class="contact-links" aria-label="Contact">
+      <a href="mailto:studio@sandraselince.com" target="_blank" rel="noopener">Email</a>
+      <a href="https://www.instagram.com/sandra.selince.artiste/" target="_blank" rel="noopener">Instagram</a>
+    </nav>
+
+    <a id="back" href="/" aria-label="Retour à Escape">Escape</a>
+    <p id="hint">Glisser ou faire défiler pour parcourir &middot; cliquer sur un collage pour le voir</p>
+
+    <div id="caption" aria-live="polite">
+      <h2 id="caption-title"></h2>
+      <p id="caption-technique"></p>
+      <p id="caption-size"></p>
+    </div>
+
+    <script type="module" src="/src/gallery.js"></script>
+  </body>
+</html>

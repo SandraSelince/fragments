@@ -1,0 +1,20 @@
+{
+  "name": "promenade-3d",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Promenade 3D à l'intérieur d'une peinture — terrain généré depuis une heightmap picturale, brouillard coloré, navigation à la souris.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "generate:placeholders": "node scripts/generate-placeholder-landscapes.mjs"
+  },
+  "devDependencies": {
+    "pngjs": "^7.0.0",
+    "vite": "^5.4.0"
+  },
+  "dependencies": {
+    "three": "^0.169.0"
+  }
+}

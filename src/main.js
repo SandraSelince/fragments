@@ -287,11 +287,43 @@ let lastPointerY = 0;
 
 canvas.addEventListener("contextmenu", (e) => e.preventDefault());
 
+// ---------- Tactile (mobile) : appui long ----------
+// en haut de l'écran = avancer, en bas = reculer, à gauche / à droite = tourner.
+// Si le doigt glisse avant la fin de l'appui, on regarde autour (comme à la souris).
+const HOLD_DELAY = 220; // ms avant que l'appui devienne un "appui long"
+const TOUCH_TURN_SPEED = 1.3; // radians par seconde
+let touchTimer = 0;
+let touchMoved = 0;
+const touchHold = { forward: false, backward: false, left: false, right: false };
+function clearTouchHold() {
+  clearTimeout(touchTimer);
+  touchHold.forward = touchHold.backward = touchHold.left = touchHold.right = false;
+}
+function startTouchHold(x, y) {
+  const fy = y / window.innerHeight;
+  const fx = x / window.innerWidth;
+  if (fy < 0.33) touchHold.forward = true;
+  else if (fy > 0.67) touchHold.backward = true;
+  else if (fx < 0.5) touchHold.left = true;
+  else touchHold.right = true;
+}
+
 canvas.addEventListener("pointerdown", (e) => {
   dismissIntro();
   dragging = true;
   lastPointerX = e.clientX;
   lastPointerY = e.clientY;
+  if (e.pointerType === "touch") {
+    // tactile : on attend de savoir si c'est un appui long ou un glissement
+    clearTouchHold();
+    touchMoved = 0;
+    const x = e.clientX, y = e.clientY;
+    touchTimer = setTimeout(() => {
+      if (touchMoved < 12) startTouchHold(x, y);
+    }, HOLD_DELAY);
+    canvas.setPointerCapture(e.pointerId);
+    return;
+  }
   // Reculer : clic droit, c.-à-d. sur le trackpad du Mac le clic en bas à droite,
   // le clic à deux doigts, ou Ctrl + clic (macOS l'envoie comme un clic gauche avec Ctrl).
   const secondary = e.button === 2 || (e.button === 0 && e.ctrlKey);
@@ -307,12 +339,19 @@ canvas.addEventListener("pointermove", (e) => {
   const dy = e.clientY - lastPointerY;
   lastPointerX = e.clientX;
   lastPointerY = e.clientY;
+  if (e.pointerType === "touch") {
+    touchMoved += Math.abs(dx) + Math.abs(dy);
+    // pendant un appui long, le doigt peut bouger un peu sans faire tourner la vue
+    if (touchHold.forward || touchHold.backward || touchHold.left || touchHold.right) return;
+    if (touchMoved < 12) return;
+  }
   yaw -= dx * LOOK_SPEED;
   pitch -= dy * LOOK_SPEED;
   pitch = Math.max(-PITCH_LIMIT, Math.min(PITCH_LIMIT, pitch));
 });
 
 function endDrag(e) {
+  clearTouchHold();
   dragging = false;
   movingForward = false;
   movingBackward = false;
@@ -371,9 +410,11 @@ function animate() {
   // tourner avec les flèches gauche/droite
   if (keys.left) yaw += KEY_TURN_SPEED * delta;
   if (keys.right) yaw -= KEY_TURN_SPEED * delta;
+  if (touchHold.left) yaw += TOUCH_TURN_SPEED * delta;
+  if (touchHold.right) yaw -= TOUCH_TURN_SPEED * delta;
 
-  const goForward = movingForward || keys.up;
-  const goBackward = movingBackward || keys.down;
+  const goForward = movingForward || keys.up || touchHold.forward;
+  const goBackward = movingBackward || keys.down || touchHold.backward;
   if (goForward !== goBackward) {
     const dir = goForward ? 1 : -1;
     const forwardX = -Math.sin(yaw);

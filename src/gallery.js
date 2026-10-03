@@ -125,11 +125,33 @@ let dragging = false;
 let dragMoved = 0;
 let lastX = 0;
 
+// tactile : appui long à droite = les fragments défilent vers la droite, à gauche = vers la gauche
+const HOLD_DELAY = 250; // ms
+const HOLD_SPEED = 3.2; // vitesse de défilement pendant l'appui (unités par seconde)
+let holdDir = 0; // -1 gauche, 0 rien, 1 droite
+let holdTimer = 0;
+let wasHold = false;
+
 canvas.addEventListener("pointerdown", (e) => {
   dragging = true;
   dragMoved = 0;
   lastX = e.clientX;
-  canvas.setPointerCapture(e.pointerId);
+  try {
+    canvas.setPointerCapture(e.pointerId);
+  } catch {
+    /* noop */
+  }
+  wasHold = false;
+  clearTimeout(holdTimer);
+  if (e.pointerType === "touch" && !focused) {
+    const x = e.clientX;
+    holdTimer = setTimeout(() => {
+      if (dragMoved < 10) {
+        holdDir = x > innerWidth / 2 ? 1 : -1;
+        wasHold = true;
+      }
+    }, HOLD_DELAY);
+  }
 });
 canvas.addEventListener("pointermove", (e) => {
   mouse.set((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
@@ -142,9 +164,19 @@ canvas.addEventListener("pointermove", (e) => {
     scrollTarget = clampScroll(scrollTarget - dx * 0.012);
   }
 });
+function endHold() {
+  clearTimeout(holdTimer);
+  holdDir = 0;
+}
+canvas.addEventListener("pointercancel", () => {
+  dragging = false;
+  endHold();
+});
 canvas.addEventListener("pointerup", (e) => {
   dragging = false;
+  endHold();
   canvas.classList.remove("is-dragging");
+  if (wasHold) return; // c'était un appui long, pas un clic
   if (dragMoved > 6) return; // c'était un glissement, pas un clic
 
   mouse.set((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
@@ -288,6 +320,7 @@ function animate() {
   const t = clock.elapsedTime;
   const k = 1 - Math.pow(0.0015, dt); // lissage indépendant de la fréquence d'images
 
+  if (holdDir && !focused) scrollTarget = clampScroll(scrollTarget + holdDir * HOLD_SPEED * dt);
   scrollX += (scrollTarget - scrollX) * k * 0.9;
   mouseSmooth.lerp(mouse, k * 0.6);
 

@@ -122,3 +122,27 @@ body.is-focused #caption {
   left: 28px;
   z-index: 5;
 }
+
+
+/* ---------- Mobile ---------- */
+
+#gallery {
+  touch-action: none; /* pas de défilement ni de zoom de la page pendant les gestes */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.hint-touch { display: none; }
+@media (hover: none) and (pointer: coarse) {
+  .hint-desktop { display: none; }
+  .hint-touch { display: inline; }
+}
+
+@media (max-width: 640px) {
+  #hint { bottom: 58px; padding: 0 24px; }
+  #back { top: 18px; right: 20px; }
+  .site-nav { top: 18px; left: 20px; }
+  .contact-links { right: 20px; bottom: 20px; }
+  #caption { bottom: 12vh; }
+}

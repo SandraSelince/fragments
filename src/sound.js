@@ -44,6 +44,7 @@ export function createSound({ src, button }) {
       fadeTo(VOLUME, 1800);
     } catch {
       /* lecture refusée (pas encore d'interaction) : on réessaiera au prochain clic */
+      started = false;
     }
   }
 
@@ -71,8 +72,16 @@ export function createSound({ src, button }) {
 
   button.addEventListener("click", (e) => {
     e.stopPropagation();
+    // Premier clic sur "Sound" alors que la musique n'a pas encore démarré :
+    // on la lance (au lieu de la couper).
+    if (!started || audio.paused && enabled) {
+      setEnabled(true);
+      return;
+    }
     setEnabled(!enabled);
   });
+  // le clic sur le bouton ne doit pas déclencher le démarrage automatique en même temps
+  button.addEventListener("pointerdown", (e) => e.stopPropagation());
 
   document.addEventListener("visibilitychange", () => {
     if (!enabled || !started) return;

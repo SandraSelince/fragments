@@ -250,7 +250,10 @@ function dismissIntro() {
   controlsHint?.classList.add("is-hidden");
   clearTimeout(hintTimer);
 }
-window.addEventListener("pointerdown", dismissIntro, { once: true });
+// démarre au premier clic, toucher ou touche du clavier (flèches comprises)
+for (const ev of ["pointerdown", "touchend", "keydown"]) {
+  window.addEventListener(ev, dismissIntro);
+}
 
 // ---------- Navigation : clic maintenu pour avancer/reculer, glisser pour tourner ----------
 

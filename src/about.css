@@ -1,5 +1,6 @@
 :root {
   --encre: #111;
+  --sound-color: var(--encre);
   --fond: #fff;
 }
 

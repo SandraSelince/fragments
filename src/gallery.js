@@ -1,5 +1,8 @@
 import * as THREE from "three";
 import { collages } from "./collages-data.js";
+import { initSiteSound } from "./sound.js";
+
+initSiteSound(); // la musique continue sur cette page (bouton Sound en bas à gauche)
 import { FullScreenQuad } from "three/addons/postprocessing/Pass.js";
 
 /**

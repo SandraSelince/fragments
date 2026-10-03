@@ -10,7 +10,7 @@ import { createTrees } from "./trees.js";
 import { createBackdrop } from "./backdrop.js";
 import { createHorizon } from "./horizon.js";
 import { createLightFx, LIGHT } from "./lightFx.js";
-import { createSound } from "./sound.js";
+import { createSound, SOUND_SRC } from "./sound.js";
 
 /**
  * Promenade 3D à l'intérieur d'une peinture.
@@ -255,7 +255,7 @@ function renderNav(activeId) {
 
 // Bande son + bouton "Sound" (voir sound.js)
 const sound = createSound({
-  src: "/audio/pale-fluorescent-nostalgia.mp3",
+  src: SOUND_SRC,
   button: document.getElementById("sound-toggle"),
 });
 
@@ -447,6 +447,46 @@ function animate() {
   currentBackdrop?.update(camera);
 
   lightFx.render(clock.elapsedTime);
+  updateLinkContrast();
+}
+
+// ---------- Liens du haut lisibles : noirs quand le fond derrière eux est clair ----------
+// Quelques fois par seconde, on mesure la luminosité de l'image juste sous "About"
+// (haut gauche) et "Fragments" (haut droite), et on bascule leur couleur.
+const contrastTargets = [
+  { el: document.querySelector(".site-nav"), cls: "tl-on-light", light: false },
+  { el: document.getElementById("gallery-link"), cls: "tr-on-light", light: false },
+];
+let contrastFrame = 0;
+const contrastPixels = new Uint8Array(4 * 64 * 16);
+function updateLinkContrast() {
+  if (++contrastFrame % 12 !== 0) return; // ~5 fois par seconde
+  const gl = renderer.getContext();
+  const sx = gl.drawingBufferWidth / window.innerWidth;
+  const sy = gl.drawingBufferHeight / window.innerHeight;
+  for (const t of contrastTargets) {
+    if (!t.el) continue;
+    const r = t.el.getBoundingClientRect();
+    // zone mesurée : le lien et un peu autour, au maximum 64 x 16 pixels
+    const w = Math.max(1, Math.min(64, Math.round((r.width + 16) * sx)));
+    const h = Math.max(1, Math.min(16, Math.round((r.height + 8) * sy)));
+    const x = Math.max(0, Math.round((r.left - 8) * sx));
+    const y = Math.max(0, gl.drawingBufferHeight - Math.round((r.bottom + 4) * sy));
+    gl.readPixels(x, y, w, h, gl.RGBA, gl.UNSIGNED_BYTE, contrastPixels);
+    let sum = 0;
+    const n = w * h;
+    for (let i = 0; i < n; i++) {
+      const o = i * 4;
+      sum += 0.2126 * contrastPixels[o] + 0.7152 * contrastPixels[o + 1] + 0.0722 * contrastPixels[o + 2];
+    }
+    const lum = sum / n / 255;
+    // seuils différents pour monter / descendre : évite que la couleur clignote
+    const light = t.light ? lum > 0.5 : lum > 0.6;
+    if (light !== t.light) {
+      t.light = light;
+      document.body.classList.toggle(t.cls, light);
+    }
+  }
 }
 
 // Poignée de débogage, uniquement en développement (npm run dev) : jamais dans la version publiée

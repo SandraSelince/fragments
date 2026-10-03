@@ -7,6 +7,8 @@ import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 import { AfterimagePass } from "three/addons/postprocessing/AfterimagePass.js";
 import { DatamoshPass } from "./datamosh.js";
+import { PixelFlowPass } from "./pixelflow.js";
+import { ShardsPass } from "./shards.js";
 
 /**
  * Effets de lumière :
@@ -266,7 +268,12 @@ export function createLightFx({ renderer, scene, camera }) {
   composer.addPass(dream);
   const mosh = new DatamoshPass(); // effet "datamosh" (voir datamosh.js), utilisé quand style = "datamosh"
   composer.addPass(mosh);
-  let style = "dream"; // "dream" (épisodes rêve/irisé) ou "datamosh", choisi par paysage
+  const pixelflow = new PixelFlowPass(); // effet "pixelflow" (voir pixelflow.js) : lignes déplacées + courants
+  composer.addPass(pixelflow);
+  const shards = new ShardsPass(); // effet "shards" (voir shards.js) : éclats étirés vers un point de fuite
+  composer.addPass(shards);
+  const STYLES = ["dream", "datamosh", "pixelflow", "shards"];
+  let style = "dream"; // style choisi par paysage (voir landscapes.js, champ glitch)
   const rays = new ShaderPass(RaysShader);
   composer.addPass(rays);
 
@@ -286,7 +293,8 @@ export function createLightFx({ renderer, scene, camera }) {
     const w = [0, 1, 2, 3].map(() => rand(0.15, 0.6));
     const strong = [0, 1, 2, 3].sort(() => Math.random() - 0.5).slice(0, 2);
     strong.forEach((i) => (w[i] = rand(0.8, 1)));
-    episode = { start: now, dur: rand(DREAM.durationMin, DREAM.durationMax), seed: Math.random() * 100 };
+    // le style est figé pour tout l'épisode : celui de l'univers où le glitch commence
+    episode = { start: now, dur: rand(DREAM.durationMin, DREAM.durationMax), seed: Math.random() * 100, style };
     dream.uniforms.uMix.value.set(...w);
     dream.uniforms.uSeed.value = episode.seed;
   }
@@ -334,13 +342,23 @@ export function createLightFx({ renderer, scene, camera }) {
       rays.uniforms.uAspect.value = camera.aspect;
 
       const amount = dreamAmount(elapsed);
-      const moshOn = style === "datamosh";
+      const epStyle = episode?.style ?? style;
+      const moshOn = epStyle === "datamosh";
+      const flowOn = epStyle === "pixelflow";
+      const shardsOn = epStyle === "shards";
+      const special = moshOn || flowOn || shardsOn;
+      shards.uniforms.uAmount.value = shardsOn ? amount : 0;
+      shards.uniforms.uTime.value = elapsed;
+      shards.uniforms.uSeed.value = dream.uniforms.uSeed.value;
       mosh.uniforms.uAmount.value = moshOn ? amount : 0;
+      pixelflow.uniforms.uAmount.value = flowOn ? amount : 0;
+      pixelflow.uniforms.uTime.value = elapsed;
+      pixelflow.uniforms.uSeed.value = dream.uniforms.uSeed.value;
       mosh.uniforms.uTime.value = elapsed;
       mosh.uniforms.uSeed.value = dream.uniforms.uSeed.value;
-      dream.uniforms.uAmount.value = moshOn ? 0 : amount;
+      dream.uniforms.uAmount.value = special ? 0 : amount;
       dream.uniforms.uTime.value = elapsed;
-      afterimage.uniforms.damp.value = moshOn ? 0 : DREAM.trails * Math.min(1, amount);
+      afterimage.uniforms.damp.value = special ? 0 : DREAM.trails * Math.min(1, amount);
 
       composer.render();
     },
@@ -350,7 +368,7 @@ export function createLightFx({ renderer, scene, camera }) {
       onPeak = fn;
     },
     setStyle(name) {
-      style = name === "datamosh" ? "datamosh" : "dream";
+      style = STYLES.includes(name) ? name : "dream";
     },
     setSize(w, h) {
       composer.setSize(w, h);

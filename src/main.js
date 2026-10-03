@@ -8,6 +8,7 @@ import { createLivingElements } from "./living.js";
 import { createFlora } from "./flora.js";
 import { createTrees } from "./trees.js";
 import { createBackdrop } from "./backdrop.js";
+import { createHorizon } from "./horizon.js";
 import { createLightFx, LIGHT } from "./lightFx.js";
 import { createSound } from "./sound.js";
 
@@ -68,6 +69,7 @@ let currentParticles = null;
 let currentLiving = null; // eau, oiseaux, papiers volants (voir living.js)
 let currentFloras = [];
 let currentTrees = null; // arbres (voir trees.js)
+let currentHorizon = null; // terrain prolongé en miroir au-delà des bords (voir horizon.js)
 let currentBackdrop = null; // montagnes lointaines (voir backdrop.js) // champs de fleurs 3D, une entrée par espèce (voir flora.js)
 let currentWaterLevel = -Infinity;
 let currentWaterAt = () => -Infinity; // hauteur de l'eau à un endroit (lac ou mer)
@@ -101,6 +103,19 @@ async function loadLandscape(landscape) {
   });
   const mesh = new THREE.Mesh(geometry, material);
   scene.add(mesh);
+
+  // Horizon infini (landscape.horizon) : la peinture et le relief continuent en miroir au-delà des bords
+  if (currentHorizon) {
+    scene.remove(currentHorizon.object);
+    currentHorizon.dispose();
+    currentHorizon = null;
+  }
+  if (landscape.horizon) {
+    texture.wrapS = texture.wrapT = THREE.MirroredRepeatWrapping;
+    texture.needsUpdate = true;
+    currentHorizon = createHorizon({ terrainSize, getHeightAt, material, ...landscape.horizon });
+    scene.add(currentHorizon.object);
+  }
 
   currentMesh = mesh;
   currentGetHeightAt = getHeightAt;
@@ -221,8 +236,13 @@ function renderNav(activeId) {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "landscape-nav__item";
-    btn.textContent = landscape.name;
-    if (landscape.id === activeId) btn.classList.add("is-active");
+    // pas de texte visible : un bâton ; le nom reste lisible au survol et par les lecteurs d'écran
+    btn.setAttribute("aria-label", landscape.name);
+    btn.title = landscape.name;
+    if (landscape.id === activeId) {
+      btn.classList.add("is-active");
+      btn.setAttribute("aria-current", "true");
+    }
     btn.addEventListener("click", async () => {
       if (landscape.id === activeId) return;
       await goToLandscape(landscape);

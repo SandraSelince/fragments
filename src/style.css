@@ -50,32 +50,74 @@ body {
 
 #landscape-nav {
   display: flex;
-  gap: 10px;
+  align-items: flex-end;
+  gap: 38px;
   pointer-events: auto;
 }
 
+/* un univers = un bâton : trait fin surmonté d'un point ;
+   au survol, un cadre ; l'univers actif est un rectangle blanc plein */
 .landscape-nav__item {
-  padding: 7px 16px;
-  border: 1px solid rgba(237, 227, 211, 0.35);
-  border-radius: 999px;
-  background: rgba(20, 18, 16, 0.4);
-  color: rgba(237, 227, 211, 0.75);
-  font-size: 12px;
-  letter-spacing: 0.04em;
-  font-weight: 300;
+  position: relative;
+  width: 26px;
+  height: 23px;
+  padding: 0;
+  border: 0;
+  background: transparent;
   cursor: pointer;
-  transition: opacity 200ms ease, background 200ms ease, color 200ms ease;
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.35));
+  opacity: 0.5; /* bâtons à 50 % de transparence */
 }
 
-.landscape-nav__item:hover {
-  color: var(--creme);
-  background: rgba(20, 18, 16, 0.65);
+.landscape-nav__item::before {
+  /* le trait */
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 1px;
+  height: 100%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.75);
+  transition: width 220ms ease, background 220ms ease, box-shadow 220ms ease;
 }
 
-.landscape-nav__item.is-active {
-  color: var(--noir-doux);
-  background: var(--creme);
-  border-color: var(--creme);
+.landscape-nav__item::after {
+  /* le point en haut */
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -1px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  transition: opacity 220ms ease;
+}
+
+.landscape-nav__item:hover::before,
+.landscape-nav__item:focus-visible::before {
+  width: 100%;
+  background: transparent;
+  box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.85), inset -1px 0 0 rgba(255, 255, 255, 0.85),
+    inset 0 2px 0 #fff;
+}
+
+.landscape-nav__item.is-active::before {
+  width: 100%;
+  background: #fff;
+  box-shadow: none;
+}
+
+.landscape-nav__item:hover::after,
+.landscape-nav__item:focus-visible::after,
+.landscape-nav__item.is-active::after {
+  opacity: 0;
+}
+
+.landscape-nav__item:focus-visible {
+  outline: none;
 }
 
 /* ---------- Écran d'intro ---------- */

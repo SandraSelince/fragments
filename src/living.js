@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { LIGHT } from "./lightFx.js";
 
 /**
  * Éléments vivants de la promenade — tout ce qui bouge dans le décor :
@@ -29,11 +30,28 @@ const DEFAULTS = {
 
 // ---------------------------------------------------------------- EAU
 
-function createWater({ terrainSize, level, color, skyColor, lake = null }) {
+const texLoader = new THREE.TextureLoader();
+
+export function createWater({ terrainSize, level, color, skyColor, lake = null, texture = null, normalMap = null, extent = 1.6, texScale = 0.035, fogScale = 1, follow = 0 }) {
   // lac : un disque (ovale) posé dans la cuvette ; sinon : une grande nappe (mer)
+  // extent : taille de la nappe par rapport au terrain (plus grand = l'eau va jusqu'à l'horizon)
+  // follow : rayon d'un grand disque d'eau qui suit la caméra (le lac va jusqu'aux montagnes lointaines)
   const geometry = lake
     ? new THREE.CircleGeometry(lake.radius, 96)
-    : new THREE.PlaneGeometry(terrainSize * 1.6, terrainSize * 1.6, 1, 1);
+    : follow > 0
+      ? new THREE.CircleGeometry(follow, 128)
+      : new THREE.PlaneGeometry(terrainSize * extent, terrainSize * extent, 1, 1);
+
+  // texture d'eau optionnelle (couleur + normal map), répétée en miroir pour éviter les raccords
+  const loadTex = (url, srgb) => {
+    const t = texLoader.load(url);
+    t.wrapS = t.wrapT = THREE.MirroredRepeatWrapping;
+    if (srgb) t.colorSpace = THREE.SRGBColorSpace;
+    t.anisotropy = 8;
+    return t;
+  };
+  const colorTex = texture ? loadTex(texture, true) : null;
+  const normalTex = normalMap ? loadTex(normalMap, false) : null;
   geometry.rotateX(-Math.PI / 2);
   if (lake) {
     geometry.scale(1, 1, lake.stretch);
@@ -50,8 +68,15 @@ function createWater({ terrainSize, level, color, skyColor, lake = null }) {
         uDeep: { value: new THREE.Color(color) },
         uSky: { value: skyColor.clone() },
         uCamPos: { value: new THREE.Vector3() },
+        uTex: { value: colorTex },
+        uNormal: { value: normalTex },
+        uTexScale: { value: texScale },
+        uFogScale: { value: fogScale },
+        uSunDir: { value: LIGHT.sunDirection.clone() },
+        uSunColor: { value: new THREE.Color(LIGHT.sunColor) },
       },
     ]),
+    defines: { USE_WATER_TEX: colorTex ? 1 : 0, USE_WATER_NORMAL: normalTex ? 1 : 0 },
     vertexShader: /* glsl */ `
       #include <common>
       #include <fog_pars_vertex>
@@ -70,6 +95,9 @@ function createWater({ terrainSize, level, color, skyColor, lake = null }) {
       uniform vec3 uDeep;
       uniform vec3 uSky;
       uniform vec3 uCamPos;
+      uniform sampler2D uTex, uNormal;
+      uniform float uTexScale, uFogScale;
+      uniform vec3 uSunDir, uSunColor;
       varying vec3 vWorld;
 
       float wHash(vec2 p) { vec3 p3 = fract(vec3(p.xyx) * 0.1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
@@ -87,13 +115,58 @@ function createWater({ terrainSize, level, color, skyColor, lake = null }) {
         // effet de Fresnel : l'eau reflète le ciel quand on la regarde de loin, rasante
         float fresnel = pow(1.0 - clamp(viewDir.y, 0.0, 1.0), 2.5);
         vec3 col = mix(uDeep, uSky, clamp(fresnel * 0.45 + (n - 0.5) * 0.3, 0.0, 1.0)); // 0.45 : part du reflet de ciel
-        // scintillements
-        float glint = smoothstep(0.86, 1.0, wNoise(vWorld.xz * 0.55 + vec2(uTime * 0.35, -uTime * 0.2)));
-        col += glint * 0.35 * (0.4 + fresnel);
-        gl_FragColor = vec4(col, 0.9);
+        #if USE_WATER_TEX
+          // Eau "miroir" (comme le matériau du modèle : rugosité 0) :
+          // la normal map fait onduler la surface, qui reflète le ciel et le soleil.
+          vec2 tp = vWorld.xz * uTexScale;
+          vec3 nSum = vec3(0.0);
+          #if USE_WATER_NORMAL
+            // trois couches de vaguelettes à des échelles et directions différentes
+            vec3 n1 = texture2D(uNormal, tp * 1.1 + vec2(uTime * 0.020, uTime * 0.013)).xyz * 2.0 - 1.0;
+            vec3 n2 = texture2D(uNormal, tp * 1.9 + vec2(-uTime * 0.017, uTime * 0.021)).xyz * 2.0 - 1.0;
+            vec3 n3 = texture2D(uNormal, tp * 0.45 + vec2(uTime * 0.006, -uTime * 0.009)).xyz * 2.0 - 1.0;
+            nSum = n1 + n2 + n3 * 1.5;
+          #endif
+          // grandes ondulations douces en plus (bruit), pour les reflets qui ondulent au loin
+          float wa = wNoise(vWorld.xz * 0.05 + vec2(uTime * 0.15, 0.0)) - wNoise(vWorld.xz * 0.05 + vec2(0.0, uTime * 0.12));
+          vec3 N = normalize(vec3(nSum.x * 1.3 + wa * 0.3, 1.0, nSum.y * 1.3 - wa * 0.2));
+
+          vec3 V = normalize(uCamPos - vWorld);
+          vec3 R = reflect(-V, N);
+          R.y = abs(R.y);
+          // ciel reflété : bleu en haut, lavande rosée vers l'horizon (comme la capture)
+          vec3 zenith = vec3(0.32, 0.42, 0.74);
+          vec3 horizon = mix(uSky, vec3(0.88, 0.78, 0.88), 0.65);
+          vec3 skyR = mix(horizon, zenith, pow(clamp(R.y, 0.0, 1.0), 0.45));
+          // couleur de l'eau en profondeur : la texture du modèle
+          vec3 deep = (texture2D(uTex, tp + N.xz * 0.03 + vec2(uTime * 0.004, uTime * 0.003)).rgb) * vec3(0.78, 0.8, 0.95);
+          float NdV = clamp(dot(N, V), 0.0, 1.0);
+          float fres = 0.04 + 0.96 * pow(1.0 - NdV, 4.0);
+          col = mix(deep, skyR, clamp(fres * 1.15, 0.0, 1.0));
+          // reflets du soleil
+          float sunSpec = pow(max(dot(R, normalize(uSunDir)), 0.0), 180.0);
+          float sunGlow = pow(max(dot(R, normalize(uSunDir)), 0.0), 12.0);
+          col += uSunColor * (sunSpec * 2.2 + sunGlow * 0.15);
+        #endif
+        #if USE_WATER_TEX
+          gl_FragColor = vec4(col, 1.0);
+        #else
+          // scintillements
+          float glint = smoothstep(0.86, 1.0, wNoise(vWorld.xz * 0.55 + vec2(uTime * 0.35, -uTime * 0.2)));
+          col += glint * 0.35 * (0.4 + fresnel);
+          gl_FragColor = vec4(col, 0.9);
+        #endif
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
-        #include <fog_fragment>
+        // brouillard (atténué avec uFogScale : l'eau texturée reste visible jusqu'aux montagnes)
+        #ifdef USE_FOG
+          #ifdef FOG_EXP2
+            float fogF = 1.0 - exp(-fogDensity * fogDensity * vFogDepth * vFogDepth);
+          #else
+            float fogF = smoothstep(fogNear, fogFar, vFogDepth);
+          #endif
+          gl_FragColor.rgb = mix(gl_FragColor.rgb, fogColor, fogF * uFogScale);
+        #endif
       }`,
   });
 
@@ -106,10 +179,13 @@ function createWater({ terrainSize, level, color, skyColor, lake = null }) {
     update(camera, delta, elapsed) {
       material.uniforms.uTime.value = elapsed;
       material.uniforms.uCamPos.value.copy(camera.position);
+      if (follow > 0 && !lake) mesh.position.set(camera.position.x, level, camera.position.z);
     },
     dispose() {
       geometry.dispose();
       material.dispose();
+      colorTex?.dispose();
+      normalTex?.dispose();
     },
   };
 }
@@ -294,7 +370,13 @@ export function createLivingElements({ living = {}, terrainSize, maxHeight, skyC
   // avec un lac : l'eau n'existe que dans la cuvette ; sinon nappe globale (level)
   const waterLevel = lake ? lake.level : cfg.water.level > 0 ? cfg.water.level * maxHeight : -Infinity;
   if (lake || cfg.water.level > 0) {
-    parts.push(createWater({ terrainSize, level: waterLevel, color: cfg.water.color, skyColor, lake }));
+    const w = cfg.water;
+    parts.push(
+      createWater({
+        terrainSize, level: waterLevel, color: w.color, skyColor, lake,
+        texture: w.texture, normalMap: w.normalMap, extent: w.extent, texScale: w.texScale, fogScale: w.fogScale, follow: w.follow,
+      })
+    );
   }
   // hauteur de l'eau à un endroit donné (-Infinity hors du lac)
   const waterAt = (x, z) => {

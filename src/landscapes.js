@@ -118,6 +118,9 @@ export const landscapes = [
   {
     id: "aurore",
     name: "Aurore ocre",
+    glitch: "pixelflow", // glitch de transition : lignes de pixels déplacées + courants (voir pixelflow.js)
+    // horizon infini : au-delà des bords, la peinture et le relief continuent en miroir jusque dans la brume
+    horizon: { extent: 1900, flatten: 0.55, flattenDistance: 500 },
     // aquarelle ocre / bordeaux (ciel blanc et bande de bois retirés) ; ancienne image : aurore.png
     image: "/paysages/aurore-ocre.jpg",
     fogColor: 0xe8ddd0, // le blanc crème du papier de l'aquarelle
@@ -136,6 +139,7 @@ export const landscapes = [
   {
     id: "brume",
     name: "Brume mauve",
+    glitch: "shards", // glitch de transition : éclats étirés vers un point de fuite (voir shards.js)
     // aquarelle aux strates bordeaux / émeraude / ocre ; le ciel et les montagnes bleues
     // sont retirés du sol et servent de décor lointain (backdrop). Ancienne image : brume.png
     image: "/paysages/brume-sol.jpg",
@@ -145,11 +149,19 @@ export const landscapes = [
     unlit: 0.55,
     relief: { heightScale: 32, curve: 1.4, ridges: 0.12, edgeRise: 0.25, perspective: 0.6, smooth: 2.5 },
     // montagnes bleues très lointaines, tout autour de l'horizon
-    backdrop: { image: "/paysages/brume-montagnes.webp", height: 240, elevation: 18, repeat: 3, haze: 0.25 },
+    backdrop: { image: "/paysages/brume-montagnes.webp", height: 240, elevation: 18, repeat: 3, haze: 0.25, baseY: 0 }, // baseY : pied des montagnes posé sur le lac
     // paysage très arboré : bosquets aux couleurs de l'aquarelle, avec des clairières
     // trees: { groves: 45, perGrove: 10, height: [9, 18] }, // arbres retirés
     living: {
-      water: { level: 0 }, // pas de mer ici
+      // lac d'eau bleue jusqu'aux montagnes (texture : "Plane_Water_low" par DonikXD, CC-BY 4.0)
+      water: {
+        level: 0.02, // juste au-dessus des creux les plus bas
+        texture: "/eau/eau-couleur.webp",
+        normalMap: "/eau/eau-normale.webp",
+        follow: 880, // disque d'eau qui suit la promenade, jusqu'au pied des montagnes lointaines
+        texScale: 0.035, // taille du motif (plus petit = motif plus grand)
+        fogScale: 0.25, // brouillard sur l'eau (1 = normal, 0 = aucun) : le lac reste bleu au loin
+      },
       birds: 18,
       papers: 20,
     },

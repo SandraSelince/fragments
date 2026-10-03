@@ -5,9 +5,10 @@ import * as THREE from "three";
  * transparent) enroulée sur un grand cylindre qui suit la caméra. Elles restent
  * donc toujours à l'horizon, très loin, quelle que soit la promenade.
  *
- * Réglages : landscape.backdrop = { image, height, elevation, repeat, tint, haze }
+ * Réglages : landscape.backdrop = { image, height, elevation, repeat, tint, haze, baseY }
+ * baseY : hauteur fixe du pied des montagnes (ex. le niveau du lac) ; sinon elles suivent la hauteur des yeux (elevation).
  */
-export function createBackdrop({ image, height = 120, elevation = -8, repeat = 3, radius = 900, haze = 0.25, hazeColor }) {
+export function createBackdrop({ image, height = 120, elevation = -8, repeat = 3, radius = 900, haze = 0.25, hazeColor, baseY = null }) {
   const tex = new THREE.TextureLoader().load(image);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.wrapS = THREE.MirroredRepeatWrapping;
@@ -32,7 +33,8 @@ export function createBackdrop({ image, height = 120, elevation = -8, repeat = 3
     object: mesh,
     update(camera) {
       // suit la caméra : l'horizon ne se rapproche jamais
-      mesh.position.set(camera.position.x, camera.position.y + elevation, camera.position.z);
+      const y = baseY !== null ? baseY : camera.position.y + elevation;
+      mesh.position.set(camera.position.x, y, camera.position.z);
     },
     dispose() {
       geo.dispose();

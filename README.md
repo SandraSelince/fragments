@@ -211,3 +211,10 @@ Aucune variable d'environnement, aucune base de données — tout est statique.
 ## Ce qui n'est pas fait
 
 Pas de mode multi-utilisateur, pas de CMS, pas de framework (React/Vue).
+
+## Crédits
+
+- Texture d'eau du lac de Brume mauve (`public/eau/`) : d'après « Plane_Water_low »
+  (https://sketchfab.com/3d-models/plane-water-low-041babee8ae24ecd8b11fddeed2f32fc)
+  par DonikXD (https://sketchfab.com/DonikXD), licence CC-BY 4.0
+  (http://creativecommons.org/licenses/by/4.0/).

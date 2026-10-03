@@ -141,8 +141,5 @@ body.is-focused #caption {
 
 @media (max-width: 640px) {
   #hint { bottom: 58px; padding: 0 24px; }
-  #back { top: 18px; right: 20px; }
-  .site-nav { top: 18px; left: 20px; }
-  .contact-links { right: 20px; bottom: 20px; }
   #caption { bottom: 12vh; }
 }

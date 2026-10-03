@@ -1,0 +1,53 @@
+/* ---------- Liens des quatre coins ----------
+ * Chargé en dernier sur toutes les pages (Escape, Fragments, About) :
+ * les liens du haut et du bas sont toujours exactement à la même place
+ * et dans le même style, quelle que soit la page.
+ * (« html body » renforce la priorité sur les styles propres à chaque page.)
+ *   haut gauche  : .site-nav (About, ou Escape sur la page About)
+ *   haut droite  : #gallery-link (Fragments) ou #back (Escape)
+ *   bas gauche   : #sound-toggle (Sound)
+ *   bas droite   : .contact-links (Email, Instagram)
+ */
+:root {
+  --coin-x: 28px; /* distance au bord gauche / droit */
+  --coin-y: 24px; /* distance au bord haut / bas */
+}
+@media (max-width: 640px) {
+  :root {
+    --coin-x: 20px;
+    --coin-y: 20px;
+  }
+}
+
+html body .site-nav,
+html body #back,
+html body #gallery-link,
+html body .contact-links,
+html body #sound-toggle {
+  position: fixed;
+  z-index: 5;
+  margin: 0;
+  padding: 0;
+  background: none;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+html body .site-nav { top: var(--coin-y); left: var(--coin-x); right: auto; bottom: auto; }
+html body #back,
+html body #gallery-link { top: var(--coin-y); right: var(--coin-x); left: auto; bottom: auto; width: auto; height: auto; display: block; }
+html body .contact-links { bottom: var(--coin-y); right: var(--coin-x); top: auto; left: auto; display: flex; gap: 22px; }
+html body #sound-toggle { bottom: var(--coin-y); left: var(--coin-x); top: auto; right: auto; display: flex; align-items: flex-end; gap: 9px; height: 12px; }
+
+html body .site-nav a,
+html body .contact-links a,
+html body #back,
+html body #gallery-link,
+html body .sound-label {
+  display: block;
+  line-height: 12px;
+}

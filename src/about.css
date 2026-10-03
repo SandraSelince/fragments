@@ -91,7 +91,8 @@ body {
 }
 
 .site-nav a,
-.contact-links a {
+.contact-links a,
+#gallery-link {
   color: var(--encre);
   font-family: "Helvetica Neue", Arial, sans-serif;
   font-size: 12px;
@@ -104,6 +105,7 @@ body {
 
 .site-nav a:hover,
 .contact-links a:hover,
+#gallery-link:hover,
 .site-nav a:focus-visible,
 .contact-links a:focus-visible {
   opacity: 1;
@@ -112,7 +114,6 @@ body {
 @media (max-width: 640px) {
   .about { padding-top: 70px; }
   .about h1 { margin-bottom: 44px; }
-  .site-nav, .contact-links { background: rgba(255, 255, 255, 0.85); padding: 4px 6px; }
 }
 
 /* dégradé vert ocre qui monte du bas de la page (fixe, derrière le texte) */

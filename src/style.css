@@ -61,7 +61,7 @@ body {
   pointer-events: auto;
 }
 
-/* un univers = un bâton : trait fin surmonté d'un point ;
+/* un univers = un bâton : un trait fin ;
    au survol, un cadre ; l'univers actif est un rectangle blanc plein */
 .landscape-nav__item {
   position: relative;
@@ -88,19 +88,7 @@ body {
   transition: width 220ms ease, background 220ms ease, box-shadow 220ms ease;
 }
 
-.landscape-nav__item::after {
-  /* le point en haut */
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: -1px;
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  transform: translateX(-50%);
-  background: #fff;
-  transition: opacity 220ms ease;
-}
+
 
 .landscape-nav__item:hover::before,
 .landscape-nav__item:focus-visible::before {
@@ -116,11 +104,6 @@ body {
   box-shadow: none;
 }
 
-.landscape-nav__item:hover::after,
-.landscape-nav__item:focus-visible::after,
-.landscape-nav__item.is-active::after {
-  opacity: 0;
-}
 
 .landscape-nav__item:focus-visible {
   outline: none;
@@ -365,7 +348,4 @@ body {
   #landscape-nav { gap: 30px; }
   .landscape-nav__item { width: 30px; }
   #controls-hint { bottom: 112px; padding: 0 24px; font-size: 11px; }
-  .site-nav { top: 18px; left: 20px; }
-  #gallery-link { top: 18px; right: 20px; }
-  .contact-links { right: 20px; bottom: 20px; }
 }

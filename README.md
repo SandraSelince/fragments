@@ -194,12 +194,20 @@ Génère un dossier `dist/` entièrement statique, déployable gratuitement sur
 
 Aucune variable d'environnement, aucune base de données — tout est statique.
 
-## Ce qui n'est volontairement pas fait dans cette V1
+## Ce que contient le site aujourd'hui
 
-Pas de son, pas de mode multi-utilisateur, pas de CMS, pas de framework
-(React/Vue), pas de bibliothèque de contrôles caméra externe (la navigation
-souris est écrite à la main dans `src/main.js`), pas de bibliothèque de bruit
-externe (le Perlin noise des particules est une implémentation compacte
-maison dans `src/particles.js`). Priorité donnée à la sensation de marcher
-dans une peinture, horizon révélé par le brouillard, poussière en suspension
-qui fait partie du même monde.
+- **Escape** (`index.html`) : la promenade 3D dans quatre univers (Collage
+  pastel, Fragment rose, Aurore ocre, Brume mauve), avec relief, fleurs et
+  rochers en 3D, forêt, eau, oiseaux, papiers volants, lumières, et des
+  épisodes de glitch qui font passer d'un univers à l'autre.
+- **Son** : bande sonore `public/audio/pale-fluorescent-nostalgia.mp3`, gérée
+  par `src/sound.js`. Elle démarre au premier clic, toucher ou touche du
+  clavier (les navigateurs interdisent le son avant une action du visiteur).
+  Le bouton « Sound » en bas à gauche coupe ou remet la musique.
+- **Fragments** (`galerie.html`) : les collages suspendus. Légendes dans
+  `src/collages-data.js`.
+- **About** (`about.html`) : présentation et prochaine exposition.
+
+## Ce qui n'est pas fait
+
+Pas de mode multi-utilisateur, pas de CMS, pas de framework (React/Vue).

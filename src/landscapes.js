@@ -147,7 +147,7 @@ export const landscapes = [
     // montagnes bleues très lointaines, tout autour de l'horizon
     backdrop: { image: "/paysages/brume-montagnes.webp", height: 240, elevation: 18, repeat: 3, haze: 0.25 },
     // paysage très arboré : bosquets aux couleurs de l'aquarelle, avec des clairières
-    trees: { groves: 45, perGrove: 10, height: [9, 18] },
+    // trees: { groves: 45, perGrove: 10, height: [9, 18] }, // arbres retirés
     living: {
       water: { level: 0 }, // pas de mer ici
       birds: 18,

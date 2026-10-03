@@ -1,0 +1,89 @@
+/* Page AR : la caméra plein écran, une intro, un lien de retour */
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #111;
+  color: #ede3d3;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+}
+#ar-container {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+#ar-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 32px;
+  text-align: center;
+  background: #1c1a17;
+}
+#ar-intro.is-hidden { display: none; }
+.ar-title {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+.ar-text {
+  margin: 0;
+  max-width: 280px;
+  font-size: 18px;
+  font-weight: 300;
+  line-height: 1.4;
+}
+#ar-start {
+  margin-top: 10px;
+  padding: 12px 22px;
+  border: 1px solid #ede3d3;
+  border-radius: 999px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+#ar-error {
+  max-width: 280px;
+  font-size: 13px;
+  opacity: 0.8;
+}
+#ar-scan {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 60px;
+  z-index: 5;
+  margin: 0;
+  text-align: center;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+}
+#ar-back {
+  position: fixed;
+  top: max(20px, env(safe-area-inset-top));
+  left: 20px;
+  z-index: 11;
+  color: #ede3d3;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+}
+/* on masque l'interface par défaut de MindAR : on a la nôtre */
+.mindar-ui-overlay { display: none !important; }

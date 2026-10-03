@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>AR — Sandra Sélince</title>
+    <link rel="stylesheet" href="/src/ar.css" />
+  </head>
+  <body>
+    <div id="ar-container"></div>
+
+    <div id="ar-intro">
+      <p class="ar-title">Réalité augmentée</p>
+      <p class="ar-text">Vise le tableau avec ton téléphone : le paysage sort de la toile.</p>
+      <button id="ar-start" type="button">Lancer la caméra</button>
+      <p id="ar-error" hidden>La caméra n'est pas accessible. Autorise-la dans les réglages du navigateur, puis recharge la page.</p>
+    </div>
+
+    <p id="ar-scan" hidden>Vise le tableau</p>
+    <a id="ar-back" href="/">Escape</a>
+
+    <script type="module" src="/src/ar.js"></script>
+  </body>
+</html>

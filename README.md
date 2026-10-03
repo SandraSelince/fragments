@@ -218,3 +218,5 @@ Pas de mode multi-utilisateur, pas de CMS, pas de framework (React/Vue).
   (https://sketchfab.com/3d-models/plane-water-low-041babee8ae24ecd8b11fddeed2f32fc)
   par DonikXD (https://sketchfab.com/DonikXD), licence CC-BY 4.0
   (http://creativecommons.org/licenses/by/4.0/).
+- Réalité augmentée (`ar.html`) : MindAR (https://github.com/hiukim/mind-ar-js), licence MIT,
+  copie locale dans `src/vendor/mindar/` (adaptée à la version de Three.js du site).

@@ -139,10 +139,10 @@ export function createWater({ terrainSize, level, color, skyColor, lake = null, 
           vec3 horizon = mix(uSky, vec3(0.88, 0.78, 0.88), 0.65);
           vec3 skyR = mix(horizon, zenith, pow(clamp(R.y, 0.0, 1.0), 0.45));
           // couleur de l'eau en profondeur : la texture du modèle
-          vec3 deep = (texture2D(uTex, tp + N.xz * 0.03 + vec2(uTime * 0.004, uTime * 0.003)).rgb) * vec3(0.78, 0.8, 0.95);
+          vec3 deep = texture2D(uTex, tp + N.xz * 0.01).rgb * 1.15; // le motif de glace (fixe), à peine déformé
           float NdV = clamp(dot(N, V), 0.0, 1.0);
           float fres = 0.04 + 0.96 * pow(1.0 - NdV, 4.0);
-          col = mix(deep, skyR, clamp(fres * 1.15, 0.0, 1.0));
+          col = mix(deep, skyR, clamp(fres * 0.55, 0.0, 0.7)); // le motif reste lisible, le ciel s'y reflète de loin
           // reflets du soleil
           float sunSpec = pow(max(dot(R, normalize(uSunDir)), 0.0), 180.0);
           float sunGlow = pow(max(dot(R, normalize(uSunDir)), 0.0), 12.0);

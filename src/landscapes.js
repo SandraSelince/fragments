@@ -153,7 +153,7 @@ export const landscapes = [
     // paysage très arboré : bosquets aux couleurs de l'aquarelle, avec des clairières
     // trees: { groves: 45, perGrove: 10, height: [9, 18] }, // arbres retirés
     living: {
-      // lac d'eau bleue jusqu'aux montagnes (texture : "Plane_Water_low" par DonikXD, CC-BY 4.0)
+      // lac de glace jusqu'aux montagnes (texture « Ice 003 », ambientCG, CC0 : libre, sans crédit)
       water: {
         level: 0.02, // juste au-dessus des creux les plus bas
         texture: "/eau/eau-couleur.webp",

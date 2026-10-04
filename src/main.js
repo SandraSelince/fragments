@@ -9,6 +9,7 @@ import { createFlora } from "./flora.js";
 import { createTrees } from "./trees.js";
 import { createBackdrop } from "./backdrop.js";
 import { createHorizon } from "./horizon.js";
+import { QUALITY } from "./device.js"; // qualité adaptée au téléphone / à l'ordinateur
 import { createLightFx, LIGHT } from "./lightFx.js";
 import { createSound, SOUND_SRC } from "./sound.js";
 import "./analytics.js"; // statistiques de visite (Vercel)
@@ -35,7 +36,7 @@ const BASE_FOG_DENSITY = 0.01; // densité de référence, multipliée par fogDe
 
 const canvas = document.getElementById("scene");
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, QUALITY.pixelRatio));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 
 const scene = new THREE.Scene();
@@ -164,6 +165,7 @@ async function loadLandscape(landscape) {
     fragments: landscape.fragments,
     getHeightAt,
     lake,
+    density: { papers: QUALITY.papers, birds: QUALITY.birds },
   });
   currentWaterLevel = currentLiving.waterLevel;
   currentWaterAt = currentLiving.waterAt;
@@ -205,7 +207,7 @@ async function loadLandscape(landscape) {
     const species = Array.isArray(landscape.flora) ? landscape.flora : [landscape.flora || {}];
     for (const config of species) {
       const f = createFlora({
-        config,
+        config: { ...config, density: QUALITY.flora },
         terrainSize,
         maxHeight: heightScale,
         getHeightAt,

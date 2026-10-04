@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { QUALITY } from "./device.js";
 
 /**
  * Champ de particules atmosphérique — poussière/pollen en suspension dans le
@@ -41,7 +42,7 @@ import * as THREE from "three";
  * lissage referme le nuage tout seul.
  */
 
-const PARTICLE_COUNT = 5000;
+const PARTICLE_COUNT = Math.round(5000 * QUALITY.particles); // moitié sur téléphone (voir device.js)
 const STAGGER_GROUPS = 2; // répartit la mise à jour sur N frames (voir plus bas) pour tenir le budget performance
 const DRIFT_AMPLITUDE = 3.2; // amplitude de la dérive de bruit, en unités de scène
 const DRIFT_FREQUENCY = 0.05; // "zoom" spatial du champ de bruit — plus petit = mouvement plus ample et lent

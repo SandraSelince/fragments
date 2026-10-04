@@ -28,7 +28,7 @@ export const landscapes = [
     name: "Collage pastel",
     // version corrigée (niveaux, balance des blancs, vibrance, agrandie x2) ;
     // l'original est dans collage-pastel-original.jpg
-    image: "/paysages/collage-pastel-sol.jpg", // sans la bande de ciel du haut (collage-pastel.jpg = image entière corrigée)
+    image: "/paysages/collage-pastel-sol.webp", // sans la bande de ciel du haut (collage-pastel.jpg = image entière corrigée)
     invertHeight: false, // relief tiré de la luminance : ciel clair au fond = montagnes, verts sombres devant = vallée
     fogColor: null,
     fogDensity: 0.22,
@@ -36,9 +36,9 @@ export const landscapes = [
     relief: { heightScale: 75, curve: 1.7, ridges: 0.3, edgeRise: 0.9, perspective: 0.85, smooth: 2.5 },
     // fragments en touche légère pour laisser voir les couleurs du collage
     fragments: [
-      { image: "/paysages/fragments/fragment-dore.png", zone: "bas", tile: 90, strength: 0.3 },
-      { image: "/paysages/fragments/fragment-rose.png", zone: "pentes", tile: 70, strength: 0.4 },
-      { image: "/paysages/fragments/fragment-beige.png", zone: "sommets", tile: 80, strength: 0.5 },
+      { image: "/paysages/fragments/fragment-dore.webp", zone: "bas", tile: 90, strength: 0.3 },
+      { image: "/paysages/fragments/fragment-rose.webp", zone: "pentes", tile: 70, strength: 0.4 },
+      { image: "/paysages/fragments/fragment-beige.webp", zone: "sommets", tile: 80, strength: 0.5 },
     ],
     living: {
       water: { level: 0.03, color: 0x2a6f86 }, // juste des mares : les verts et roses du premier plan restent visibles
@@ -50,8 +50,8 @@ export const landscapes = [
   {
     id: "fragment-rose",
     name: "Fragment rose",
-    image: "/paysages/fragment-rose.jpg",
-    depthImage: "/paysages/fragment-rose-depth.png",
+    image: "/paysages/fragment-rose.webp",
+    depthImage: "/paysages/fragment-rose-depth.webp",
     invertHeight: true,
     fogColor: null,
     fogDensity: 0.45, // était 1 : le brouillard blanchissait tout le relief
@@ -110,9 +110,9 @@ export const landscapes = [
     ],
     // Fragments de collage plaqués sur le relief (voir terrainMaterial.js).
     fragments: [
-      { image: "/paysages/fragments/fragment-dore.png", zone: "bas", tile: 90, strength: 0.85 },
-      { image: "/paysages/fragments/fragment-rose.png", zone: "pentes", tile: 70, strength: 0.9 },
-      { image: "/paysages/fragments/fragment-beige.png", zone: "sommets", tile: 80, strength: 0.95 },
+      { image: "/paysages/fragments/fragment-dore.webp", zone: "bas", tile: 90, strength: 0.85 },
+      { image: "/paysages/fragments/fragment-rose.webp", zone: "pentes", tile: 70, strength: 0.9 },
+      { image: "/paysages/fragments/fragment-beige.webp", zone: "sommets", tile: 80, strength: 0.95 },
     ],
   },
   {
@@ -122,7 +122,7 @@ export const landscapes = [
     // horizon infini : au-delà des bords, la peinture et le relief continuent en miroir jusque dans la brume
     horizon: { extent: 1900, flatten: 0.55, flattenDistance: 500 },
     // aquarelle ocre / bordeaux (ciel blanc et bande de bois retirés) ; ancienne image : aurore.png
-    image: "/paysages/aurore-ocre.jpg",
+    image: "/paysages/aurore-ocre.webp",
     fogColor: 0xe8ddd0, // le blanc crème du papier de l'aquarelle
     fogDensity: 0.3,
     saturation: 1.2,
@@ -142,7 +142,7 @@ export const landscapes = [
     glitch: "shards", // glitch de transition : éclats étirés vers un point de fuite (voir shards.js)
     // aquarelle aux strates bordeaux / émeraude / ocre ; le ciel et les montagnes bleues
     // sont retirés du sol et servent de décor lointain (backdrop). Ancienne image : brume.png
-    image: "/paysages/brume-sol.jpg",
+    image: "/paysages/brume-sol.webp",
     fogColor: 0xb8cfdf, // bleu du ciel de l'aquarelle
     fogDensity: 0.35,
     saturation: 1.25,

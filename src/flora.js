@@ -44,6 +44,13 @@ const rand = (a, b) => a + Math.random() * (b - a);
 
 export function createFlora({ config = {}, terrainSize, maxHeight, getHeightAt, waterLevel = -Infinity, waterAt = null, startZ }) {
   const C = { ...FLORA_DEFAULTS, ...config, textures: { ...FLORA_DEFAULTS.textures, ...(config.textures || {}) } };
+  // density < 1 (téléphone) : moins de massifs et de touffes, même ambiance
+  const density = config.density ?? 1;
+  if (density < 1) {
+    C.patches = Math.max(1, Math.round(C.patches * density));
+    C.perPatch = Math.max(1, Math.round(C.perPatch * Math.sqrt(density)));
+    C.nearStart = Math.max(1, Math.round(C.nearStart * Math.sqrt(density)));
+  }
   const group = new THREE.Group();
   const uniforms = { uTime: { value: 0 }, uWind: { value: C.wind } };
   let meshes = [];

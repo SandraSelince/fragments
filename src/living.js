@@ -362,8 +362,11 @@ function createPapers({ count, fragments, getHeightAt, wind }) {
 
 // ---------------------------------------------------------------- ASSEMBLAGE
 
-export function createLivingElements({ living = {}, terrainSize, maxHeight, skyColor, fragments = [], getHeightAt, lake = null }) {
+export function createLivingElements({ living = {}, terrainSize, maxHeight, skyColor, fragments = [], getHeightAt, lake = null, density = {} }) {
   const cfg = { ...DEFAULTS, ...living, water: { ...DEFAULTS.water, ...(living.water || {}) } };
+  // téléphone : moins de papiers volants et d'oiseaux (voir device.js)
+  cfg.papers = Math.round(cfg.papers * (density.papers ?? 1));
+  cfg.birds = Math.round(cfg.birds * (density.birds ?? 1));
   const group = new THREE.Group();
   const parts = [];
 

@@ -3,6 +3,7 @@ import { collages } from "./collages-data.js";
 import { initSiteSound } from "./sound.js";
 import { FullScreenQuad } from "three/addons/postprocessing/Pass.js";
 import "./analytics.js"; // statistiques de visite (Vercel)
+import { QUALITY } from "./device.js";
 
 initSiteSound(); // la musique continue sur cette page (bouton Sound en bas à gauche)
 
@@ -31,7 +32,7 @@ const CAMERA_Z = 5.2; // distance de la caméra : plus petit = collages plus pro
 
 const canvas = document.getElementById("gallery");
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, QUALITY.pixelRatio + 0.25)); // un peu plus fin : les collages doivent rester nets
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 
 const scene = new THREE.Scene();

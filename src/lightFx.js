@@ -9,6 +9,7 @@ import { AfterimagePass } from "three/addons/postprocessing/AfterimagePass.js";
 import { DatamoshPass } from "./datamosh.js";
 import { PixelFlowPass } from "./pixelflow.js";
 import { ShardsPass } from "./shards.js";
+import { QUALITY } from "./device.js";
 
 /**
  * Effets de lumière :
@@ -258,7 +259,7 @@ export function createLightFx({ renderer, scene, camera }) {
   // --- post-traitement
   const size = renderer.getSize(new THREE.Vector2());
   const composer = new EffectComposer(renderer);
-  composer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+  composer.setPixelRatio(Math.min(window.devicePixelRatio, QUALITY.effectsPixelRatio));
   composer.addPass(new RenderPass(scene, camera));
   const bloom = new UnrealBloomPass(size.clone(), LIGHT.bloomStrength, 0.6, LIGHT.bloomThreshold);
   if (LIGHT.bloomStrength > 0) composer.addPass(bloom);
@@ -373,7 +374,7 @@ export function createLightFx({ renderer, scene, camera }) {
     setSize(w, h) {
       composer.setSize(w, h);
       bloom.setSize(w, h);
-      const pr = Math.min(window.devicePixelRatio, 1.5);
+      const pr = Math.min(window.devicePixelRatio, QUALITY.effectsPixelRatio);
       dream.uniforms.uRes.value.set(w * pr, h * pr);
     },
     dispose() {

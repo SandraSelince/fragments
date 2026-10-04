@@ -49,6 +49,13 @@ export const collages = [
     size: "30 × 40 cm, 2025",
   },
   {
+    image: "/collages/collage-11.webp",
+    width: 835, height: 1404,
+    title: "Fragment #11",
+    technique: "Mixed media",
+    size: "30 × 40 cm, 2025",
+  },
+  {
     image: "/collages/collage-13.webp",
     width: 814, height: 1446,
     title: "Fragment #13",
@@ -124,12 +131,5 @@ export const collages = [
     title: "Fragment #24",
     technique: "Mixed media",
     size: "30 × 40 cm, 2025",
-  },
-  {
-    image: "/collages/orange-valles-copie.webp",
-    width: 835, height: 1404,
-    title: "Orange Valles",
-    technique: "", // pas d'informations dans le nom du fichier
-    size: "",
   },
 ];

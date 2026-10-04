@@ -11,6 +11,7 @@ import { createBackdrop } from "./backdrop.js";
 import { createHorizon } from "./horizon.js";
 import { createLightFx, LIGHT } from "./lightFx.js";
 import { createSound, SOUND_SRC } from "./sound.js";
+import "./analytics.js"; // statistiques de visite (Vercel)
 
 /**
  * Promenade 3D à l'intérieur d'une peinture.

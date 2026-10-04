@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 // MindAR (suivi d'image, open source, licence MIT) — copie locale, adaptée à notre version de Three.js
 import { MindARThree } from "./vendor/mindar/mindar-image-three.prod.js";
+import "./analytics.js"; // statistiques de visite (Vercel)
 
 /**
  * RÉALITÉ AUGMENTÉE sur un tableau.

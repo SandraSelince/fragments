@@ -22,11 +22,11 @@ const AR = {
   popDuration: 1.6, // secondes pour que les calques se décollent
 };
 
-// ordre de Sandra (liste des calques, 1 = le plus proche) : 1 premier plan, 2 collines, 3 champs, background
+// ordre de Sandra (liste des calques, 1 = le plus proche) : 1 premier plan, 2 collines rouges, 3 champs jaunes, background
 const LAYERS = [
   { image: "/ar/calque-1-fond.webp", depth: 0 }, // background : ciel, collines vertes, lac
   { image: "/ar/calque-3-champs.webp", depth: 0.12 }, // calque 3 : champs jaunes
-  { image: "/ar/calque-2-collines.webp", depth: 0.24 }, // calque 2 : collines rouge-prune
+  { image: "/ar/calque-2-collines.webp?v=2", depth: 0.24 }, // calque 2 : collines rouge-prune
   { image: "/ar/calque-4-premier-plan.webp", depth: 0.38 }, // calque 1 : premier plan vert et rose
 ];
 

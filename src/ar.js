@@ -20,14 +20,15 @@ const AR = {
   target: "/ar/cible.mind",
   aspect: 2048 / 1471, // hauteur / largeur du tableau (photo de référence)
   popDuration: 1.6, // secondes pour que les calques se décollent
+  layersAspect: 2301 / 1750, // hauteur / largeur des calques (même format que le background)
 };
 
 // ordre de Sandra (liste des calques, 1 = le plus proche) : 1 premier plan, 2 collines rouges, 3 champs jaunes, background
 const LAYERS = [
-  { image: "/ar/calque-1-fond.webp", depth: 0 }, // background : ciel, collines vertes, lac
-  { image: "/ar/calque-3-champs.webp", depth: 0.12 }, // calque 3 : champs jaunes
-  { image: "/ar/calque-2-collines.webp?v=2", depth: 0.24 }, // calque 2 : collines rouge-prune
-  { image: "/ar/calque-4-premier-plan.webp", depth: 0.38 }, // calque 1 : premier plan vert et rose
+  { image: "/ar/calque-1-fond.webp?v=4", depth: 0 }, // background : ciel, collines vertes, lac
+  { image: "/ar/calque-3-champs.webp?v=4", depth: 0.12 }, // calque 3 : champs jaunes
+  { image: "/ar/calque-2-collines.webp?v=4", depth: 0.24 }, // calque 2 : collines rouge-prune
+  { image: "/ar/calque-4-premier-plan.webp?v=4", depth: 0.38 }, // calque 1 : premier plan vert et rose
 ];
 
 const start = document.getElementById("ar-start");
@@ -58,7 +59,9 @@ const layerMeshes = LAYERS.map((L, i) => {
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.anisotropy = 8;
   const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0, depthWrite: false });
-  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1, AR.aspect), mat);
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1, AR.layersAspect), mat);
+  // le haut des calques est calé sur le haut du tableau
+  mesh.userData.baseY = AR.aspect / 2 - AR.layersAspect / 2;
   mesh.renderOrder = i; // du fond vers l'avant
   mesh.userData.depth = L.depth;
   root.add(mesh);
@@ -96,6 +99,7 @@ function animate() {
     const k = (dist - z) / dist;
     m.position.z = z;
     m.scale.set(k, k, 1);
+    m.position.y = m.userData.baseY * k;
   });
 
   renderer.render(scene, camera);

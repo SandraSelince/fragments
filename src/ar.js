@@ -14,6 +14,10 @@ import "./analytics.js"; // statistiques de visite (Vercel)
  *
  * Pour changer : remplacer les fichiers dans public/ar/ et ajuster LAYERS
  * (depth = décollement, en fraction de la largeur du tableau ; l'ordre = du fond vers l'avant).
+ *
+ * La même page reconnaît aussi la CARTE DE VISITE « Énigme » (cible n° 1 dans cible.mind) :
+ * la vidéo public/ar/enigme-carte.mp4 se pose dessus et tourne en boucle.
+ * cible.mind contient 2 cibles : 0 = le tableau, 1 = la carte (calculées ensemble).
  */
 
 const AR = {
@@ -21,6 +25,13 @@ const AR = {
   aspect: 2048 / 1471, // hauteur / largeur du tableau (photo de référence)
   popDuration: 1.6, // secondes pour que les calques se décollent
   layersAspect: 2301 / 1750, // hauteur / largeur des calques (même format que le background)
+};
+
+// carte de visite « Énigme » : la vidéo couvre toute la carte
+const CARTE = {
+  video: "/ar/enigme-carte.mp4",
+  aspect: 1920 / 1080, // hauteur / largeur de la carte
+  fadeIn: 0.8,
 };
 
 // ordre de Sandra (liste des calques, 1 = le plus proche) : 1 premier plan, 2 collines rouges, 3 champs jaunes, background
@@ -38,7 +49,7 @@ const errorMsg = document.getElementById("ar-error");
 
 const mindar = new MindARThree({
   container: document.getElementById("ar-container"),
-  imageTargetSrc: AR.target,
+  imageTargetSrc: AR.target + "?v=2",
   uiLoading: "no",
   uiScanning: "no",
   uiError: "no",
@@ -68,16 +79,44 @@ const layerMeshes = LAYERS.map((L, i) => {
   return mesh;
 });
 
+// ---------- la carte « Énigme » : vidéo posée sur la carte ----------
+const carteAnchor = mindar.addAnchor(1);
+const video = document.createElement("video");
+video.src = CARTE.video;
+video.loop = true;
+video.muted = true; // obligatoire pour la lecture automatique sur téléphone
+video.playsInline = true;
+video.setAttribute("playsinline", "");
+video.setAttribute("webkit-playsinline", "");
+video.preload = "auto";
+const videoTex = new THREE.VideoTexture(video);
+videoTex.colorSpace = THREE.SRGBColorSpace;
+const videoMat = new THREE.MeshBasicMaterial({ map: videoTex, transparent: true, opacity: 0 });
+carteAnchor.group.add(new THREE.Mesh(new THREE.PlaneGeometry(1, CARTE.aspect), videoMat));
+let carteFoundAt = -1;
+
 // ---------- apparition / disparition ----------
 let foundAt = -1;
 const clock = new THREE.Clock();
+const updateScan = () => (scan.hidden = foundAt >= 0 || carteFoundAt >= 0);
 anchor.onTargetFound = () => {
   foundAt = clock.getElapsedTime();
-  scan.hidden = true;
+  updateScan();
 };
 anchor.onTargetLost = () => {
   foundAt = -1;
-  scan.hidden = false;
+  updateScan();
+};
+carteAnchor.onTargetFound = () => {
+  carteFoundAt = clock.getElapsedTime();
+  video.play().catch(() => {});
+  updateScan();
+};
+carteAnchor.onTargetLost = () => {
+  carteFoundAt = -1;
+  videoMat.opacity = 0;
+  video.pause();
+  updateScan();
 };
 
 const ease = (t) => 1 - Math.pow(1 - Math.min(Math.max(t, 0), 1), 3);
@@ -102,18 +141,22 @@ function animate() {
     m.position.y = m.userData.baseY * k;
   });
 
+  if (carteFoundAt >= 0) videoMat.opacity = Math.min(1, (t - carteFoundAt) / CARTE.fadeIn);
+
   renderer.render(scene, camera);
 }
 
 // ---------- démarrage (après un geste : obligatoire pour la caméra sur iPhone) ----------
 start.addEventListener("click", async () => {
   start.disabled = true;
+  // "débloque" la vidéo pendant le geste de l'utilisateur (iPhone)
+  video.play().then(() => video.pause()).catch(() => {});
   try {
     await mindar.start();
     intro.classList.add("is-hidden");
     scan.hidden = false;
     renderer.setAnimationLoop(animate);
-    window.__ar = { mindar, anchor, get found() { return foundAt >= 0; } };
+    window.__ar = { mindar, anchor, carteAnchor, get found() { return foundAt >= 0; }, get carte() { return carteFoundAt >= 0; } };
   } catch (e) {
     console.error(e);
     start.disabled = false;

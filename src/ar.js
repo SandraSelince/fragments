@@ -32,6 +32,7 @@ const CARTE = {
   video: "/ar/enigme-carte.mp4",
   aspect: 1920 / 1080, // hauteur / largeur de la carte
   fadeIn: 0.8,
+  opacity: 0.75, // 1 = vidéo pleine, 0.75 = on devine la carte à travers
 };
 
 // ordre de Sandra (liste des calques, 1 = le plus proche) : 1 premier plan, 2 collines rouges, 3 champs jaunes, background
@@ -89,8 +90,20 @@ video.playsInline = true;
 video.setAttribute("playsinline", "");
 video.setAttribute("webkit-playsinline", "");
 video.preload = "auto";
-const videoTex = new THREE.VideoTexture(video);
+// La vidéo est recopiée dans un canvas : sur iPhone, une VideoTexture directe
+// peut s'afficher à l'envers (bug WebKit), un canvas s'affiche toujours à l'endroit.
+const vCanvas = document.createElement("canvas");
+vCanvas.width = 540;
+vCanvas.height = 960;
+const vCtx = vCanvas.getContext("2d");
+const videoTex = new THREE.CanvasTexture(vCanvas);
 videoTex.colorSpace = THREE.SRGBColorSpace;
+const drawVideo = () => {
+  if (video.readyState >= 2) {
+    vCtx.drawImage(video, 0, 0, vCanvas.width, vCanvas.height);
+    videoTex.needsUpdate = true;
+  }
+};
 const videoMat = new THREE.MeshBasicMaterial({ map: videoTex, transparent: true, opacity: 0 });
 carteAnchor.group.add(new THREE.Mesh(new THREE.PlaneGeometry(1, CARTE.aspect), videoMat));
 let carteFoundAt = -1;
@@ -141,7 +154,10 @@ function animate() {
     m.position.y = m.userData.baseY * k;
   });
 
-  if (carteFoundAt >= 0) videoMat.opacity = Math.min(1, (t - carteFoundAt) / CARTE.fadeIn);
+  if (carteFoundAt >= 0) {
+    videoMat.opacity = CARTE.opacity * Math.min(1, (t - carteFoundAt) / CARTE.fadeIn);
+    drawVideo();
+  }
 
   renderer.render(scene, camera);
 }

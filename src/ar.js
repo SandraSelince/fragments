@@ -90,22 +90,17 @@ video.playsInline = true;
 video.setAttribute("playsinline", "");
 video.setAttribute("webkit-playsinline", "");
 video.preload = "auto";
-// La vidéo est recopiée dans un canvas : sur iPhone, une VideoTexture directe
-// peut s'afficher à l'envers (bug WebKit), un canvas s'affiche toujours à l'endroit.
-const vCanvas = document.createElement("canvas");
-vCanvas.width = 540;
-vCanvas.height = 960;
-const vCtx = vCanvas.getContext("2d");
-const videoTex = new THREE.CanvasTexture(vCanvas);
+// On ne laisse PAS le navigateur retourner l'image (flipY) : certains téléphones
+// (Android/Pixel, iPhone) l'ignorent et la vidéo sort à l'envers. On retourne
+// nous-mêmes les coordonnées du plan : le résultat est identique partout.
+const videoTex = new THREE.VideoTexture(video);
 videoTex.colorSpace = THREE.SRGBColorSpace;
-const drawVideo = () => {
-  if (video.readyState >= 2) {
-    vCtx.drawImage(video, 0, 0, vCanvas.width, vCanvas.height);
-    videoTex.needsUpdate = true;
-  }
-};
+videoTex.flipY = false;
 const videoMat = new THREE.MeshBasicMaterial({ map: videoTex, transparent: true, opacity: 0 });
-carteAnchor.group.add(new THREE.Mesh(new THREE.PlaneGeometry(1, CARTE.aspect), videoMat));
+const carteGeo = new THREE.PlaneGeometry(1, CARTE.aspect);
+const uv = carteGeo.attributes.uv;
+for (let i = 0; i < uv.count; i++) uv.setY(i, 1 - uv.getY(i));
+carteAnchor.group.add(new THREE.Mesh(carteGeo, videoMat));
 let carteFoundAt = -1;
 
 // ---------- apparition / disparition ----------
@@ -156,7 +151,6 @@ function animate() {
 
   if (carteFoundAt >= 0) {
     videoMat.opacity = CARTE.opacity * Math.min(1, (t - carteFoundAt) / CARTE.fadeIn);
-    drawVideo();
   }
 
   renderer.render(scene, camera);

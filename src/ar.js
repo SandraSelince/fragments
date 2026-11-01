@@ -164,21 +164,44 @@ function animate() {
 }
 
 // ---------- démarrage (après un geste : obligatoire pour la caméra sur iPhone) ----------
+// suivi des étapes du démarrage, affiché si ça bloque (pour savoir où)
+let step = "chargement de la page";
+const gum = navigator.mediaDevices && navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+if (gum) {
+  navigator.mediaDevices.getUserMedia = (c) => {
+    step = "attente de l'autorisation caméra";
+    return gum(c).then(
+      (stream) => {
+        step = "caméra ouverte, image en attente";
+        return stream;
+      },
+      (err) => {
+        step = "caméra refusée (" + err.name + ")";
+        throw err;
+      }
+    );
+  };
+}
+
 start.addEventListener("click", async () => {
   start.disabled = true;
+  step = "démarrage";
   const label = start.textContent;
   start.textContent = "Chargement…";
   errorMsg.hidden = true;
   // si rien ne se passe, on explique quoi faire au lieu de rester bloqué
   const watchdog = setTimeout(() => {
     errorMsg.textContent =
-      "C'est long… Vérifie qu'une fenêtre « Autoriser la caméra » n'attend pas ta réponse (en haut de l'écran). Sinon, recharge la page.";
+      "C'est long… Vérifie qu'une fenêtre « Autoriser la caméra » n'attend pas ta réponse. " +
+      "Si le lien a été ouvert depuis Instagram, WhatsApp ou LinkedIn, ouvre-le plutôt dans Chrome ou Safari. " +
+      "[étape : " + step + "]";
     errorMsg.hidden = false;
   }, 12000);
-  // "débloque" la vidéo pendant le geste de l'utilisateur (iPhone)
-  for (const T of videoTargets) T.video.play().then(() => T.video.pause()).catch(() => {});
+  // (les vidéos sont muettes : elles ont le droit de démarrer seules, pas besoin de les « débloquer »
+  // ici — ça évite que le téléphone décode 2 vidéos en même temps que la caméra démarre)
   try {
     await mindar.start();
+    step = "prêt";
     intro.classList.add("is-hidden");
     scan.hidden = false;
     renderer.setAnimationLoop(animate);

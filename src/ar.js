@@ -17,7 +17,7 @@ import "./analytics.js"; // statistiques de visite (Vercel)
  *
  * UN SEUL LIEN pour toutes les œuvres : la même page reconnaît aussi les œuvres
  * de la liste VIDEOS ; seule la vidéo de l'œuvre visée se met en marche.
- * cible.mind contient : 0 = le tableau en calques, 1 = la carte Énigme, 2 = tempête de nuit.
+ * cible.mind contient : 0 = le tableau en calques, 1 = la carte Énigme, 2 = tempête de nuit (déclenchée par l'aquarelle public/ar/tempete.jpg).
  * Pour ajouter une œuvre : ajouter sa cible dans cible.mind + une ligne dans VIDEOS.
  */
 
@@ -52,7 +52,7 @@ const errorMsg = document.getElementById("ar-error");
 
 const mindar = new MindARThree({
   container: document.getElementById("ar-container"),
-  imageTargetSrc: AR.target + "?v=3",
+  imageTargetSrc: AR.target + "?v=4",
   uiLoading: "no",
   uiScanning: "no",
   uiError: "no",
@@ -166,6 +166,15 @@ function animate() {
 // ---------- démarrage (après un geste : obligatoire pour la caméra sur iPhone) ----------
 start.addEventListener("click", async () => {
   start.disabled = true;
+  const label = start.textContent;
+  start.textContent = "Chargement…";
+  errorMsg.hidden = true;
+  // si rien ne se passe, on explique quoi faire au lieu de rester bloqué
+  const watchdog = setTimeout(() => {
+    errorMsg.textContent =
+      "C'est long… Vérifie qu'une fenêtre « Autoriser la caméra » n'attend pas ta réponse (en haut de l'écran). Sinon, recharge la page.";
+    errorMsg.hidden = false;
+  }, 12000);
   // "débloque" la vidéo pendant le geste de l'utilisateur (iPhone)
   for (const T of videoTargets) T.video.play().then(() => T.video.pause()).catch(() => {});
   try {
@@ -174,9 +183,19 @@ start.addEventListener("click", async () => {
     scan.hidden = false;
     renderer.setAnimationLoop(animate);
     window.__ar = { mindar, anchor, videoTargets, get found() { return foundAt >= 0; }, get playing() { return videoTargets.filter((T) => T.foundAt >= 0).map((T) => T.name); } };
+    clearTimeout(watchdog);
   } catch (e) {
+    clearTimeout(watchdog);
     console.error(e);
     start.disabled = false;
+    start.textContent = label;
+    const name = (e && e.name) || "";
+    errorMsg.textContent =
+      name === "NotAllowedError"
+        ? "La caméra est refusée. Touche le cadenas à gauche de l'adresse, autorise la caméra, puis recharge la page."
+        : name === "NotReadableError"
+        ? "La caméra est déjà utilisée par une autre application. Ferme-la, puis recharge la page."
+        : "La caméra n'a pas pu démarrer (" + (name || "erreur") + "). Recharge la page et réessaie.";
     errorMsg.hidden = false;
   }
 });

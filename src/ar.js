@@ -33,7 +33,7 @@ const AR = {
 // aspect = hauteur / largeur ; opacity 1 = vidéo pleine, 0.75 = on devine l'œuvre à travers
 const VIDEOS = [
   { index: 1, name: "carte Énigme", video: "/ar/enigme-carte.mp4", aspect: 1920 / 1080, opacity: 0.75 },
-  { index: 2, name: "tempête de nuit", video: "/ar/tempete.mp4", aspect: 1518 / 1036, opacity: 0.8 },
+  { index: 2, name: "tempête de nuit", video: "/ar/tempete.mp4", aspect: 1518 / 1036, opacity: 0.6 },
 ];
 const FADE_IN = 0.8; // secondes de fondu à l'apparition d'une vidéo
 

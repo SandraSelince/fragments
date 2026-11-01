@@ -15,9 +15,10 @@ import "./analytics.js"; // statistiques de visite (Vercel)
  * Pour changer : remplacer les fichiers dans public/ar/ et ajuster LAYERS
  * (depth = décollement, en fraction de la largeur du tableau ; l'ordre = du fond vers l'avant).
  *
- * La même page reconnaît aussi la CARTE DE VISITE « Énigme » (cible n° 1 dans cible.mind) :
- * la vidéo public/ar/enigme-carte.mp4 se pose dessus et tourne en boucle.
- * cible.mind contient 2 cibles : 0 = le tableau, 1 = la carte (calculées ensemble).
+ * UN SEUL LIEN pour toutes les œuvres : la même page reconnaît aussi les œuvres
+ * de la liste VIDEOS ; seule la vidéo de l'œuvre visée se met en marche.
+ * cible.mind contient : 0 = le tableau en calques, 1 = la carte Énigme, 2 = tempête de nuit.
+ * Pour ajouter une œuvre : ajouter sa cible dans cible.mind + une ligne dans VIDEOS.
  */
 
 const AR = {
@@ -27,13 +28,14 @@ const AR = {
   layersAspect: 2301 / 1750, // hauteur / largeur des calques (même format que le background)
 };
 
-// carte de visite « Énigme » : la vidéo couvre toute la carte
-const CARTE = {
-  video: "/ar/enigme-carte.mp4",
-  aspect: 1920 / 1080, // hauteur / largeur de la carte
-  fadeIn: 0.8,
-  opacity: 0.75, // 1 = vidéo pleine, 0.75 = on devine la carte à travers
-};
+// œuvres qui lancent une vidéo : index = n° de la cible dans cible.mind
+// (0 = le tableau en calques ; les vidéos commencent à 1)
+// aspect = hauteur / largeur ; opacity 1 = vidéo pleine, 0.75 = on devine l'œuvre à travers
+const VIDEOS = [
+  { index: 1, name: "carte Énigme", video: "/ar/enigme-carte.mp4", aspect: 1920 / 1080, opacity: 0.75 },
+  { index: 2, name: "tempête de nuit", video: "/ar/tempete.mp4", aspect: 1518 / 1036, opacity: 1 },
+];
+const FADE_IN = 0.8; // secondes de fondu à l'apparition d'une vidéo
 
 // ordre de Sandra (liste des calques, 1 = le plus proche) : 1 premier plan, 2 collines rouges, 3 champs jaunes, background
 const LAYERS = [
@@ -50,7 +52,7 @@ const errorMsg = document.getElementById("ar-error");
 
 const mindar = new MindARThree({
   container: document.getElementById("ar-container"),
-  imageTargetSrc: AR.target + "?v=2",
+  imageTargetSrc: AR.target + "?v=3",
   uiLoading: "no",
   uiScanning: "no",
   uiError: "no",
@@ -80,33 +82,48 @@ const layerMeshes = LAYERS.map((L, i) => {
   return mesh;
 });
 
-// ---------- la carte « Énigme » : vidéo posée sur la carte ----------
-const carteAnchor = mindar.addAnchor(1);
-const video = document.createElement("video");
-video.src = CARTE.video;
-video.loop = true;
-video.muted = true; // obligatoire pour la lecture automatique sur téléphone
-video.playsInline = true;
-video.setAttribute("playsinline", "");
-video.setAttribute("webkit-playsinline", "");
-video.preload = "auto";
+let foundAt = -1;
+const clock = new THREE.Clock();
+const updateScan = () => (scan.hidden = foundAt >= 0 || videoTargets.some((T) => T.foundAt >= 0));
+
+// ---------- les œuvres vidéo : chaque vidéo ne joue que sur SON œuvre ----------
 // On ne laisse PAS le navigateur retourner l'image (flipY) : certains téléphones
 // (Android/Pixel, iPhone) l'ignorent et la vidéo sort à l'envers. On retourne
 // nous-mêmes les coordonnées du plan : le résultat est identique partout.
-const videoTex = new THREE.VideoTexture(video);
-videoTex.colorSpace = THREE.SRGBColorSpace;
-videoTex.flipY = false;
-const videoMat = new THREE.MeshBasicMaterial({ map: videoTex, transparent: true, opacity: 0 });
-const carteGeo = new THREE.PlaneGeometry(1, CARTE.aspect);
-const uv = carteGeo.attributes.uv;
-for (let i = 0; i < uv.count; i++) uv.setY(i, 1 - uv.getY(i));
-carteAnchor.group.add(new THREE.Mesh(carteGeo, videoMat));
-let carteFoundAt = -1;
+const videoTargets = VIDEOS.map((V) => {
+  const anchor = mindar.addAnchor(V.index);
+  const video = document.createElement("video");
+  video.src = V.video;
+  video.loop = true;
+  video.muted = true; // obligatoire pour la lecture automatique sur téléphone
+  video.playsInline = true;
+  video.setAttribute("playsinline", "");
+  video.setAttribute("webkit-playsinline", "");
+  video.preload = "metadata";
+  const tex = new THREE.VideoTexture(video);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.flipY = false;
+  const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0 });
+  const geo = new THREE.PlaneGeometry(1, V.aspect);
+  const uv = geo.attributes.uv;
+  for (let i = 0; i < uv.count; i++) uv.setY(i, 1 - uv.getY(i));
+  anchor.group.add(new THREE.Mesh(geo, mat));
+  const T = { ...V, anchor, video, mat, foundAt: -1 };
+  anchor.onTargetFound = () => {
+    T.foundAt = clock.getElapsedTime();
+    video.play().catch(() => {});
+    updateScan();
+  };
+  anchor.onTargetLost = () => {
+    T.foundAt = -1;
+    mat.opacity = 0;
+    video.pause();
+    updateScan();
+  };
+  return T;
+});
 
 // ---------- apparition / disparition ----------
-let foundAt = -1;
-const clock = new THREE.Clock();
-const updateScan = () => (scan.hidden = foundAt >= 0 || carteFoundAt >= 0);
 anchor.onTargetFound = () => {
   foundAt = clock.getElapsedTime();
   updateScan();
@@ -115,17 +132,7 @@ anchor.onTargetLost = () => {
   foundAt = -1;
   updateScan();
 };
-carteAnchor.onTargetFound = () => {
-  carteFoundAt = clock.getElapsedTime();
-  video.play().catch(() => {});
-  updateScan();
-};
-carteAnchor.onTargetLost = () => {
-  carteFoundAt = -1;
-  videoMat.opacity = 0;
-  video.pause();
-  updateScan();
-};
+
 
 const ease = (t) => 1 - Math.pow(1 - Math.min(Math.max(t, 0), 1), 3);
 const camLocal = new THREE.Vector3();
@@ -149,8 +156,8 @@ function animate() {
     m.position.y = m.userData.baseY * k;
   });
 
-  if (carteFoundAt >= 0) {
-    videoMat.opacity = CARTE.opacity * Math.min(1, (t - carteFoundAt) / CARTE.fadeIn);
+  for (const T of videoTargets) {
+    if (T.foundAt >= 0) T.mat.opacity = T.opacity * Math.min(1, (t - T.foundAt) / FADE_IN);
   }
 
   renderer.render(scene, camera);
@@ -160,13 +167,13 @@ function animate() {
 start.addEventListener("click", async () => {
   start.disabled = true;
   // "débloque" la vidéo pendant le geste de l'utilisateur (iPhone)
-  video.play().then(() => video.pause()).catch(() => {});
+  for (const T of videoTargets) T.video.play().then(() => T.video.pause()).catch(() => {});
   try {
     await mindar.start();
     intro.classList.add("is-hidden");
     scan.hidden = false;
     renderer.setAnimationLoop(animate);
-    window.__ar = { mindar, anchor, carteAnchor, get found() { return foundAt >= 0; }, get carte() { return carteFoundAt >= 0; } };
+    window.__ar = { mindar, anchor, videoTargets, get found() { return foundAt >= 0; }, get playing() { return videoTargets.filter((T) => T.foundAt >= 0).map((T) => T.name); } };
   } catch (e) {
     console.error(e);
     start.disabled = false;

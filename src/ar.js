@@ -17,7 +17,8 @@ import "./analytics.js"; // statistiques de visite (Vercel)
  *
  * UN SEUL LIEN pour toutes les œuvres : la même page reconnaît aussi les œuvres
  * de la liste VIDEOS ; seule la vidéo de l'œuvre visée se met en marche.
- * cible.mind contient : 0 = le tableau en calques, 1 = la carte Énigme, 2 = tempête de nuit (déclenchée par l'aquarelle public/ar/tempete.jpg).
+ * cible.mind contient : 0 = le tableau en calques, 1 = la carte Énigme, 2 = tempête de nuit (déclenchée par l'aquarelle public/ar/tempete.jpg),
+ * 3 à 7 = série 23 à 27 (aquarelles public/ar/oeuvre-23.jpg … oeuvre-27.jpg).
  * Pour ajouter une œuvre : ajouter sa cible dans cible.mind + une ligne dans VIDEOS.
  */
 
@@ -34,6 +35,12 @@ const AR = {
 const VIDEOS = [
   { index: 1, name: "carte Énigme", video: "/ar/enigme-carte.mp4", aspect: 1920 / 1080, opacity: 0.75 },
   { index: 2, name: "tempête de nuit", video: "/ar/tempete.mp4", aspect: 1518 / 1036, opacity: 0.6 },
+  // série 23 → 27 : chaque aquarelle (public/ar/oeuvre-NN.jpg) lance sa vidéo (oeuvre-NN.mp4)
+  { index: 3, name: "23 · Vallée rose", video: "/ar/oeuvre-23.mp4", aspect: 802 / 544, opacity: 0.6 },
+  { index: 4, name: "24 · Prairie dorée", video: "/ar/oeuvre-24.mp4", aspect: 798 / 544, opacity: 0.6 },
+  { index: 5, name: "25 · Rivière verte", video: "/ar/oeuvre-25.mp4", aspect: 820 / 544, opacity: 0.6 },
+  { index: 6, name: "26 · Cascades bleues", video: "/ar/oeuvre-26.mp4", aspect: 794 / 544, opacity: 0.6 },
+  { index: 7, name: "27 · Terres rouges", video: "/ar/oeuvre-27.mp4", aspect: 806 / 544, opacity: 0.6 },
 ];
 const FADE_IN = 0.8; // secondes de fondu à l'apparition d'une vidéo
 
@@ -52,7 +59,7 @@ const errorMsg = document.getElementById("ar-error");
 
 const mindar = new MindARThree({
   container: document.getElementById("ar-container"),
-  imageTargetSrc: AR.target + "?v=4",
+  imageTargetSrc: AR.target + "?v=5",
   uiLoading: "no",
   uiScanning: "no",
   uiError: "no",
@@ -99,7 +106,7 @@ const videoTargets = VIDEOS.map((V) => {
   video.playsInline = true;
   video.setAttribute("playsinline", "");
   video.setAttribute("webkit-playsinline", "");
-  video.preload = "metadata";
+  video.preload = "none"; // chaque vidéo ne se charge que quand son œuvre est vue
   const tex = new THREE.VideoTexture(video);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.flipY = false;

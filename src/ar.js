@@ -18,7 +18,7 @@ import "./analytics.js"; // statistiques de visite (Vercel)
  * UN SEUL LIEN pour toutes les œuvres : la même page reconnaît aussi les œuvres
  * de la liste VIDEOS ; seule la vidéo de l'œuvre visée se met en marche.
  * cible.mind contient : 0 = le tableau en calques, 1 = la carte Énigme, 2 = tempête de nuit (déclenchée par l'aquarelle public/ar/tempete.jpg),
- * 3 à 7 = série 23 à 27, 8 à 13 = série 28 à 33 (aquarelles public/ar/oeuvre-NN.jpg).
+ * 3 à 7 = série 23 à 27, 8 à 13 = série 28 à 33, 14 à 18 = série 38 à 42 (aquarelles public/ar/oeuvre-NN.jpg).
  * Pour ajouter une œuvre : ajouter sa cible dans cible.mind + une ligne dans VIDEOS.
  */
 
@@ -48,6 +48,12 @@ const VIDEOS = [
   { index: 11, name: "31 · Eaux mauves", video: "/ar/oeuvre-31.mp4", aspect: 796 / 544, opacity: 0.6 },
   { index: 12, name: "32 · Terres roses", video: "/ar/oeuvre-32.mp4", aspect: 796 / 544, opacity: 0.6 },
   { index: 13, name: "33 · Jardin vert", video: "/ar/oeuvre-33.mp4", aspect: 800 / 544, opacity: 0.6 },
+  // série 38 → 42
+  { index: 14, name: "38 · Rives roses", video: "/ar/oeuvre-38.mp4", aspect: 640 / 446, opacity: 0.6 },
+  { index: 15, name: "39 · Bande dorée", video: "/ar/oeuvre-39.mp4", aspect: 642 / 448, opacity: 0.6 },
+  { index: 16, name: "40 · Nuages turquoise", video: "/ar/oeuvre-40.mp4", aspect: 642 / 436, opacity: 0.6 },
+  { index: 17, name: "41 · Reflets rouges", video: "/ar/oeuvre-41.mp4", aspect: 640 / 442, opacity: 0.6 },
+  { index: 18, name: "42 · Haie verte", video: "/ar/oeuvre-42.mp4", aspect: 640 / 438, opacity: 0.6 },
 ];
 const FADE_IN = 0.8; // secondes de fondu à l'apparition d'une vidéo
 
@@ -66,7 +72,7 @@ const errorMsg = document.getElementById("ar-error");
 
 const mindar = new MindARThree({
   container: document.getElementById("ar-container"),
-  imageTargetSrc: AR.target + "?v=6",
+  imageTargetSrc: AR.target + "?v=7",
   uiLoading: "no",
   uiScanning: "no",
   uiError: "no",

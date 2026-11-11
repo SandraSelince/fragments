@@ -18,7 +18,7 @@ import "./analytics.js"; // statistiques de visite (Vercel)
  * UN SEUL LIEN pour toutes les œuvres : la même page reconnaît aussi les œuvres
  * de la liste VIDEOS ; seule la vidéo de l'œuvre visée se met en marche.
  * cible.mind contient : 0 = le tableau en calques, 1 = la carte Énigme, 2 = tempête de nuit (déclenchée par l'aquarelle public/ar/tempete.jpg),
- * 3 à 7 = série 23 à 27, 8 à 13 = série 28 à 33, 14 à 18 = série 38 à 42, 19 à 27 = série 48 à 56 (aquarelles public/ar/oeuvre-NN.jpg).
+ * 3 à 7 = série 23 à 27, 8 à 13 = série 28 à 33, 14 à 18 = série 38 à 42, 19 à 27 = série 48 à 56, 28 à 29 = 58 et 59 (aquarelles public/ar/oeuvre-NN.jpg).
  * Pour ajouter une œuvre : ajouter sa cible dans cible.mind + une ligne dans VIDEOS.
  */
 
@@ -64,6 +64,9 @@ const VIDEOS = [
   { index: 25, name: "54 · Collines de miel", video: "/ar/oeuvre-54.mp4", aspect: 790 / 544, opacity: 0.6 },
   { index: 26, name: "55 · Rive carmin", video: "/ar/oeuvre-55.mp4", aspect: 780 / 544, opacity: 0.6 },
   { index: 27, name: "56 · Cyprès et eaux bleues", video: "/ar/oeuvre-56.mp4", aspect: 792 / 544, opacity: 0.6 },
+  // série 58 → 59
+  { index: 28, name: "58 · Miroir de la forêt", video: "/ar/oeuvre-58.mp4", aspect: 810 / 544, opacity: 0.6 },
+  { index: 29, name: "59 · Prairies de sauge", video: "/ar/oeuvre-59.mp4", aspect: 794 / 544, opacity: 0.6 },
 ];
 const FADE_IN = 0.8; // secondes de fondu à l'apparition d'une vidéo
 
@@ -82,7 +85,7 @@ const errorMsg = document.getElementById("ar-error");
 
 const mindar = new MindARThree({
   container: document.getElementById("ar-container"),
-  imageTargetSrc: AR.target + "?v=8",
+  imageTargetSrc: AR.target + "?v=9",
   uiLoading: "no",
   uiScanning: "no",
   uiError: "no",

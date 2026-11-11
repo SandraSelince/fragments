@@ -18,7 +18,7 @@ import "./analytics.js"; // statistiques de visite (Vercel)
  * UN SEUL LIEN pour toutes les œuvres : la même page reconnaît aussi les œuvres
  * de la liste VIDEOS ; seule la vidéo de l'œuvre visée se met en marche.
  * cible.mind contient : 0 = le tableau en calques, 1 = la carte Énigme, 2 = tempête de nuit (déclenchée par l'aquarelle public/ar/tempete.jpg),
- * 3 à 7 = série 23 à 27, 8 à 13 = série 28 à 33, 14 à 18 = série 38 à 42 (aquarelles public/ar/oeuvre-NN.jpg).
+ * 3 à 7 = série 23 à 27, 8 à 13 = série 28 à 33, 14 à 18 = série 38 à 42, 19 à 27 = série 48 à 56 (aquarelles public/ar/oeuvre-NN.jpg).
  * Pour ajouter une œuvre : ajouter sa cible dans cible.mind + une ligne dans VIDEOS.
  */
 
@@ -54,6 +54,16 @@ const VIDEOS = [
   { index: 16, name: "40 · Nuages turquoise", video: "/ar/oeuvre-40.mp4", aspect: 642 / 436, opacity: 0.6 },
   { index: 17, name: "41 · Reflets rouges", video: "/ar/oeuvre-41.mp4", aspect: 640 / 442, opacity: 0.6 },
   { index: 18, name: "42 · Haie verte", video: "/ar/oeuvre-42.mp4", aspect: 640 / 438, opacity: 0.6 },
+  // série 48 → 56
+  { index: 19, name: "48 · Estuaire doré", video: "/ar/oeuvre-48.mp4", aspect: 794 / 544, opacity: 0.6 },
+  { index: 20, name: "49 · Vallée de menthe", video: "/ar/oeuvre-49.mp4", aspect: 786 / 544, opacity: 0.6 },
+  { index: 21, name: "50 · Dunes de sauge", video: "/ar/oeuvre-50.mp4", aspect: 774 / 544, opacity: 0.6 },
+  { index: 22, name: "51 · Marais lavande", video: "/ar/oeuvre-51.mp4", aspect: 766 / 544, opacity: 0.6 },
+  { index: 23, name: "52 · Bois et fleurs roses", video: "/ar/oeuvre-52.mp4", aspect: 770 / 544, opacity: 0.6 },
+  { index: 24, name: "53 · Reflets de nacre", video: "/ar/oeuvre-53.mp4", aspect: 788 / 544, opacity: 0.6 },
+  { index: 25, name: "54 · Collines de miel", video: "/ar/oeuvre-54.mp4", aspect: 790 / 544, opacity: 0.6 },
+  { index: 26, name: "55 · Rive carmin", video: "/ar/oeuvre-55.mp4", aspect: 780 / 544, opacity: 0.6 },
+  { index: 27, name: "56 · Cyprès et eaux bleues", video: "/ar/oeuvre-56.mp4", aspect: 792 / 544, opacity: 0.6 },
 ];
 const FADE_IN = 0.8; // secondes de fondu à l'apparition d'une vidéo
 
@@ -72,7 +82,7 @@ const errorMsg = document.getElementById("ar-error");
 
 const mindar = new MindARThree({
   container: document.getElementById("ar-container"),
-  imageTargetSrc: AR.target + "?v=7",
+  imageTargetSrc: AR.target + "?v=8",
   uiLoading: "no",
   uiScanning: "no",
   uiError: "no",

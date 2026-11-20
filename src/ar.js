@@ -85,9 +85,28 @@ const intro = document.getElementById("ar-intro");
 const scan = document.getElementById("ar-scan");
 const errorMsg = document.getElementById("ar-error");
 
+// ---------- mode diagnostic : ajouter ?debug à l'adresse ----------
+const DEBUG = new URLSearchParams(location.search).has("debug");
+const dbg = DEBUG ? document.createElement("pre") : null;
+const dbgLog = [];
+const debug = (msg) => {
+  if (!DEBUG) return;
+  dbgLog.push(new Date().toLocaleTimeString() + " " + msg);
+  if (dbgLog.length > 8) dbgLog.shift();
+};
+if (DEBUG) {
+  dbg.style.cssText =
+    "position:fixed;left:8px;right:8px;bottom:8px;z-index:99;margin:0;padding:8px;" +
+    "font:11px/1.35 ui-monospace,monospace;color:#fff;background:rgba(0,0,0,.72);" +
+    "border-radius:8px;white-space:pre-wrap;pointer-events:none";
+  document.body.appendChild(dbg);
+  window.addEventListener("error", (e) => debug("erreur : " + e.message));
+}
+
+const AR_VERSION = 11; // à augmenter quand cible.mind change
 const mindar = new MindARThree({
   container: document.getElementById("ar-container"),
-  imageTargetSrc: AR.target + "?v=11",
+  imageTargetSrc: AR.target + "?v=" + AR_VERSION,
   uiLoading: "no",
   uiScanning: "no",
   uiError: "no",
@@ -135,6 +154,7 @@ const videoTargets = VIDEOS.map((V) => {
   video.setAttribute("playsinline", "");
   video.setAttribute("webkit-playsinline", "");
   video.preload = "none"; // chaque vidéo ne se charge que quand son œuvre est vue
+  video.addEventListener("error", () => debug("vidéo illisible : " + V.name + " (code " + (video.error && video.error.code) + ")"));
   const tex = new THREE.VideoTexture(video);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.flipY = false;
@@ -146,7 +166,11 @@ const videoTargets = VIDEOS.map((V) => {
   const T = { ...V, anchor, video, mat, foundAt: -1 };
   anchor.onTargetFound = () => {
     T.foundAt = clock.getElapsedTime();
-    video.play().catch(() => {});
+    debug("reconnue : " + T.name);
+    video.play().then(
+      () => debug("vidéo lancée : " + T.name),
+      (err) => debug("vidéo bloquée : " + T.name + " (" + err.name + ")")
+    );
     updateScan();
   };
   anchor.onTargetLost = () => {
@@ -161,6 +185,7 @@ const videoTargets = VIDEOS.map((V) => {
 // ---------- apparition / disparition ----------
 anchor.onTargetFound = () => {
   foundAt = clock.getElapsedTime();
+  debug("reconnue : tableau en calques");
   updateScan();
 };
 anchor.onTargetLost = () => {
@@ -196,6 +221,15 @@ function animate() {
   }
 
   renderer.render(scene, camera);
+  if (DEBUG) showDebug();
+}
+
+function showDebug() {
+  const playing = videoTargets.filter((T) => T.foundAt >= 0).map((T) => T.name + (T.video.paused ? " (en pause)" : " (joue)"));
+  dbg.textContent =
+    "version " + AR_VERSION + " · " + (VIDEOS.length + 1) + " œuvres · étape : " + step + "\n" +
+    "à l'écran : " + (playing.join(", ") || (foundAt >= 0 ? "tableau en calques" : "rien")) + "\n" +
+    dbgLog.join("\n");
 }
 
 // ---------- démarrage (après un geste : obligatoire pour la caméra sur iPhone) ----------
@@ -224,6 +258,7 @@ start.addEventListener("click", async () => {
   const label = start.textContent;
   start.textContent = "Chargement…";
   errorMsg.hidden = true;
+  const dbgTimer = DEBUG ? setInterval(showDebug, 500) : 0;
   // si rien ne se passe, on explique quoi faire au lieu de rester bloqué
   const watchdog = setTimeout(() => {
     errorMsg.textContent =
@@ -237,6 +272,8 @@ start.addEventListener("click", async () => {
   try {
     await mindar.start();
     step = "prêt";
+    clearInterval(dbgTimer);
+    debug("prêt : " + (VIDEOS.length + 1) + " œuvres chargées");
     intro.classList.add("is-hidden");
     scan.hidden = false;
     renderer.setAnimationLoop(animate);
@@ -244,6 +281,9 @@ start.addEventListener("click", async () => {
     clearTimeout(watchdog);
   } catch (e) {
     clearTimeout(watchdog);
+    clearInterval(dbgTimer);
+    debug("échec du démarrage : " + ((e && (e.name + " " + e.message)) || e));
+    if (DEBUG) showDebug();
     console.error(e);
     start.disabled = false;
     start.textContent = label;
